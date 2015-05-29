@@ -196,20 +196,17 @@ namespace simple.sql
         {
             this._where.Enqueue(new KeyValuePair<string, KeyValuePair<operators, object>>
                                (string.Empty, new KeyValuePair<operators, object>(operators.Or, where)));
-            where.SqlParameters.AsParallel<SqlParameter>().ForAll(s => 
+            foreach (var s in where.SqlParameters)
             {
                 string reg = @"_(\d+)$";
                 var orgName = Regex.Replace(s.ParameterName, reg, "");
-                lock (this)
+                var count = this.SqlParameters.Count(prm => prm.ParameterName.StartsWith(orgName));
+                if (count != 0)
                 {
-                    var count = this.SqlParameters.Count(prm => prm.ParameterName.StartsWith(orgName));
-                    if (count != 0)
-                    {
-                        s.ParameterName = string.Format("{0}_{1}", orgName, count + 1);
-                    }
-                    this.SqlParameters.Add(s);
+                    s.ParameterName = string.Format("{0}_{1}", orgName, count + 1);
                 }
-            });
+                this.SqlParameters.Add(s);
+            }
             return this;
         }
 
@@ -364,10 +361,10 @@ namespace simple.sql
                     sql.AppendLine(string.Format("{0} {1}", term, where));
                 }
             }
-           
+
             return sql.ToString();
         }
-        
+
         internal string ToSql()
         {
             return this.ToSql(AND_TERM);
