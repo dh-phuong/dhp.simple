@@ -30,7 +30,7 @@ namespace simple.helper
         /// <returns></returns>
         public string ToTableName<T>()
         {
-            return Activator.CreateInstance<T>().GetType().Name.Decamelize().ToLower();
+            return string.Format("dbo.{0}", Activator.CreateInstance<T>().GetType().Name.Decamelize(true));
         }
 
         /// <summary>

@@ -218,29 +218,33 @@ namespace simple.helper
             return default(T);
         }
 
-        /// <summary>
-        /// Gets the member names of properties. Not all IDynamicMetaObjectProvider have support for this.
-        /// </summary>
-        /// <param name="target">The target.</param>
-        /// <param name="dynamicOnly">if set to <c>true</c> [dynamic only]. Won't add reflected properties</param>
-        /// <returns></returns>
-        public static IEnumerable<string> GetMemberNames(this object target, bool dynamicOnly = false)
-        {
-            var tList = new List<string>();
-            if (!dynamicOnly)
-            {
-                tList.AddRange(target.GetType().GetProperties()
-                                               .Select(it => it.Name.Decamelize().ToLower()));
-            }
-            var tTarget = target as IDynamicMetaObjectProvider;
-            if (tTarget != null)
-            {
-                tList.AddRange(tTarget.GetMetaObject(Expression.Constant(tTarget))
-                                      .GetDynamicMemberNames()
-                                      .Select(it => it.Decamelize().ToLower()));
-            }
-            return tList;
-        }
+        ///// <summary>
+        ///// Gets the member names of properties. Not all IDynamicMetaObjectProvider have support for this.
+        ///// </summary>
+        ///// <param name="target">The target.</param>
+        ///// <param name="dynamicOnly">if set to <c>true</c> [dynamic only]. Won't add reflected properties</param>
+        ///// <returns></returns>
+        //public static IEnumerable<string> GetMemberNames(this object target, bool dynamicOnly = false)
+        //{
+        //    var tList = new List<string>();
+        //    if (!dynamicOnly)
+        //    {
+        //        tList.AddRange(target.GetType().GetProperties()
+        //                                       .Where(p => p.CanRead && p.CanWrite
+        //                                           && !p.CustomAttributes.Any(s=> s.GetType().Equals(typeof(AcceptRejectRule)))
+
+        //                                      )
+        //                                       .Select(it => it.Name.Decamelize(true)));
+        //    }
+        //    var tTarget = target as IDynamicMetaObjectProvider;
+        //    if (tTarget != null)
+        //    {
+        //        tList.AddRange(tTarget.GetMetaObject(Expression.Constant(tTarget))
+        //                              .GetDynamicMemberNames()
+        //                              .Select(it => it.Decamelize().ToLower()));
+        //    }
+        //    return tList;
+        //}
 
         /// <summary>
         /// Sets the name of the member.
@@ -252,7 +256,10 @@ namespace simple.helper
         {
             target.GetType().GetProperty(memberName.Camelize()).SetValue(target, value, null);
         }
-
+        public static object GetMemberValue(this object target, string memberName)
+        {
+            return target.GetType().GetProperty(memberName.Camelize()).GetValue(target);
+        }
         /// <summary>
         /// Gets the type of the database.
         /// </summary>
