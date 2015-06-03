@@ -8,6 +8,7 @@ using System.Diagnostics;
 
 using System.Data.SqlClient;
 using System.Text;
+using simple.helper;
 
 namespace simple.sql
 {
@@ -181,6 +182,38 @@ namespace simple.sql
         #endregion
 
         #region "CreateParameter メソッド"
+        /// <summary> 
+        /// SqlParameter インスタンスを生成します。 
+        /// </summary> 
+        /// <param name="parameterName">パラメータ名</param> 
+        /// <param name="dbType">パラメータの種類</param> 
+        /// <param name="value">パラメータの値</param> 
+        /// <returns>SqlParameter インスタンス</returns> 
+        public static SqlParameter CreateParameter(string parameterName, object value)
+        {
+            if (parameterName == null)
+            {
+                throw new ArgumentNullException("parameterName", "parameterName パラメータが null (Nothing in Visual Basic) 参照です。");
+            }
+            else if (parameterName.Length == 0)
+            {
+                throw new ArgumentException("parameterName パラメータが未指定です。", "parameterName");
+            }
+            SqlDbType dbType = SqlDbType.NVarChar;
+            if (value == null || value.GetType() == typeof(DBNull))
+            {
+                value = DBNull.Value;
+            }
+            else
+            {
+                dbType = value.GetType().GetDBType();
+            }
+            SqlParameter prm = new SqlParameter(SqlHelper.BuildParameterName(parameterName), dbType);
+            prm.IsNullable = true;
+            prm.Value = value;
+            return prm;
+        }
+
         /// <summary> 
         /// SqlParameter インスタンスを生成します。 
         /// </summary> 
