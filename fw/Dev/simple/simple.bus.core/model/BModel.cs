@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Linq;
+using System.Collections.Generic;
 using System.Data.Common;
 using simple.helper;
+using simple.bus.core.attribute;
 
 namespace simple.bus.core.model
 {
@@ -46,6 +49,18 @@ namespace simple.bus.core.model
         public override string ToString()
         {
             return StringHelper.Me.ToJson<object>(this);
+        }
+
+        /// <summary>
+        /// Gets the member names of properties.
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerable<string> GetMemberNames()
+        {
+            return this.GetType().GetProperties()
+                                              .Where(p => p.CanRead && p.CanWrite
+                                                  && !p.CustomAttributes.Any(s => s.AttributeType.Equals(typeof(AutoColumnAttribute))))
+                                              .Select(it => it.Name.Decamelize(true));
         }
     }
 }

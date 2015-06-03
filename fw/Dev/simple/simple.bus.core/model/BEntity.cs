@@ -1,4 +1,6 @@
-﻿using System.Data.Common;
+﻿using System;
+using System.Data.Common;
+using simple.bus.core.attribute;
 
 namespace simple.bus.core.model
 {
@@ -25,7 +27,6 @@ namespace simple.bus.core.model
 
         #endregion Constructor
 
-
         #region Base
 
         /// <summary>
@@ -34,8 +35,58 @@ namespace simple.bus.core.model
         /// <value>
         /// The identifier.
         /// </value>
+        [AutoColumn()]
         public decimal Id { get; set; }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether [delete flag].
+        /// </summary>
+        /// <value>
+        ///   <c>true</c> if [delete flag]; otherwise, <c>false</c>.
+        /// </value>
+        public bool DeleteFlag { get; set; }
+
+        /// <summary>
+        /// Gets or sets the create u cd.
+        /// </summary>
+        /// <value>
+        /// The create user cd.
+        /// </value>
+        public string CreateUCd { get; set; }
+
+        /// <summary>
+        /// Gets or sets the update u cd.
+        /// </summary>
+        /// <value>
+        /// The update user cd.
+        /// </value>
+        public string UpdateUCd { get; set; }
+
+        /// <summary>
+        /// Gets or sets the create date.
+        /// </summary>
+        /// <value>
+        /// The create date.
+        /// </value>
+        public DateTime CreateDate { get; set; }
+
+        /// <summary>
+        /// Gets or sets the update date.
+        /// </summary>
+        /// <value>
+        /// The update date.
+        /// </value>
+        public DateTime UpdateDate { get; set; }
+
+
+        /// <summary>
+        /// Gets or sets the version number.
+        /// </summary>
+        /// <value>
+        /// The version number.
+        /// </value>
+        [AutoColumn]
+        public int VersionNumber { get; set; }
         #endregion Base
     }
 }

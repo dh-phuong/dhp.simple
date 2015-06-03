@@ -67,6 +67,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="attribute\AutoColumnAttribute.cs" />
+    <Compile Include="context\IBContext.cs" />
     <Compile Include="model\BEntity.cs" />
     <Compile Include="model\BModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using simple.bus.core.model;
+using simple.bus.core.context;
 
 namespace simple.bus.core.service
 {
@@ -13,6 +14,12 @@ namespace simple.bus.core.service
     public abstract class BService<T>
          where T : BModel<T>
     {
+        public IBContext Context { get; set; }
+
+        public BService()
+        {
+            this.Context = new DBContext();
+        }
 
         public DateTime NowDate
         {
@@ -20,6 +27,18 @@ namespace simple.bus.core.service
             {
                 return DateTime.Now;
             }
+        }
+
+        public void SetUpdateInfo<E>(E entity)
+            where E: BEntity<E>
+        {
+            var nowDate = this.NowDate;
+            entity.CreateDate = nowDate;
+            entity.UpdateDate = nowDate;
+            entity.VersionNumber = 1;
+            entity.DeleteFlag = false;
+            entity.UpdateUCd = "10";
+            entity.CreateUCd = "10";
         }
 
         /// <summary>
