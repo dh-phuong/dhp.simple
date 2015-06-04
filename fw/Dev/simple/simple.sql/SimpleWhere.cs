@@ -32,7 +32,7 @@ namespace simple.sql
             Or = 14,
         }
         private readonly Queue<KeyValuePair<string, KeyValuePair<operators, object>>> _where;
-        internal readonly IList<SqlParameter> SqlParameters;
+        internal IEnumerable<SqlParameter> SqlParameters { private set; get; }
         private const string AND_TERM = "AND";
         private const string OR_TERM = "OR";
         public SimpleWhere()
@@ -83,7 +83,6 @@ namespace simple.sql
         /// <returns></returns>
         public SimpleWhere Gt(string field, object value)
         {
-            //this.where_.Enqueue(new KeyValuePair<string, KeyValuePair<operators, object>>(field.Decamelize().ToLower(), new KeyValuePair<operators, object>(operators.Gt, value)));
             this.AddOpr(operators.Gt, field, value);
             return this;
         }
@@ -95,7 +94,6 @@ namespace simple.sql
         /// <returns></returns>
         public SimpleWhere Le(string field, object value)
         {
-            //this.where_.Enqueue(new KeyValuePair<string, KeyValuePair<operators, object>>(field.Decamelize().ToLower(), new KeyValuePair<operators, object>(operators.Le, value)));
             this.AddOpr(operators.Le, field, value);
             return this;
         }
@@ -107,7 +105,6 @@ namespace simple.sql
         /// <returns></returns>
         public SimpleWhere Ge(string field, object value)
         {
-            //this.where_.Enqueue(new KeyValuePair<string, KeyValuePair<operators, object>>(field.Decamelize().ToLower(), new KeyValuePair<operators, object>(operators.Ge, value)));
             this.AddOpr(operators.Ge, field, value);
             return this;
         }
@@ -165,7 +162,6 @@ namespace simple.sql
         /// <returns></returns>
         public SimpleWhere In(string field, params object[] values)
         {
-            //this.where_.Enqueue(new KeyValuePair<string, KeyValuePair<operators, object>>(field.Decamelize().ToLower(), new KeyValuePair<operators, object>(operators.In, values)));
             this.AddOpr(operators.In, field, values);
             return this;
         }
@@ -177,13 +173,11 @@ namespace simple.sql
         /// <returns></returns>
         public SimpleWhere Nin(string field, params object[] values)
         {
-            //this.where_.Enqueue(new KeyValuePair<string, KeyValuePair<operators, object>>(field.Decamelize().ToLower(), new KeyValuePair<operators, object>(operators.Nin, values)));
             this.AddOpr(operators.Nin, field, values);
             return this;
         }
         public SimpleWhere Btw(string field, object value1, object value2)
         {
-            //this.where_.Enqueue(new KeyValuePair<string, KeyValuePair<operators, object>>(field.Decamelize().ToLower(), new KeyValuePair<operators, object>(operators.Btw, new object[] { value1, value2 })));
             this.AddOpr(operators.Btw, field, new object[] { value1, value2 });
             return this;
         }
@@ -192,21 +186,34 @@ namespace simple.sql
         /// </summary>
         /// <param name="where">The where.</param>
         /// <returns></returns>
-        public SimpleWhere Or(SimpleWhere where)
+        public SimpleWhere Or(SimpleWhere simpleWhere)
         {
-            this._where.Enqueue(new KeyValuePair<string, KeyValuePair<operators, object>>
-                               (string.Empty, new KeyValuePair<operators, object>(operators.Or, where)));
-            foreach (var s in where.SqlParameters)
+            foreach (var keyPair in simpleWhere._where)
             {
-                string reg = @"_(\d+)$";
-                var orgName = Regex.Replace(s.ParameterName, reg, "");
-                var count = this.SqlParameters.Count(prm => prm.ParameterName.StartsWith(orgName));
-                if (count != 0)
+                //KeyValuePair<string, KeyValuePair<operators, object>> keyPair = simpleWhere._where.Dequeue();
+                KeyValuePair<operators, object> valuePair = keyPair.Value;
+                if (valuePair.Key == operators.Or)
                 {
-                    s.ParameterName = string.Format("{0}_{1}", orgName, count + 1);
+                    //this.Or((SimpleWhere)valuePair.Value);
+                  
                 }
-                this.SqlParameters.Add(s);
+                else
+                {
+                    SqlParameter[] sqlParams = (SqlParameter[])valuePair.Value;
+                    string reg = @"_(\d+)$";
+                    foreach (var s in sqlParams)
+                    {
+                        var orgName = Regex.Replace(s.ParameterName, reg, "");
+                        var count = this.SqlParameters.Count(prm => prm.ParameterName.StartsWith(orgName));
+                        count = count + 1;
+                        s.ParameterName = string.Format("{0}_{1}", orgName, count);
+                        this.SqlParameters = this.SqlParameters.Add(s);
+                    }
+                }
+                
             }
+            this._where.Enqueue(new KeyValuePair<string, KeyValuePair<operators, object>>(string.Empty,
+                    new KeyValuePair<operators, object>(operators.Or, simpleWhere)));
             return this;
         }
 
@@ -223,21 +230,25 @@ namespace simple.sql
             var count = this.SqlParameters.Count(s => s.ParameterName.StartsWith(parameterName));
             count = count + 1;
             parameterName = string.Format("{0}_{1}", parameterName, count);
-
+            SqlParameter[] param;
             if (value == null || value.GetType() == typeof(DBNull))
             {
                 value = DBNull.Value;
-                this.SqlParameters.Add(SqlHelper.CreateParameter(parameterName, dbType, value));
+                param = new SqlParameter[1];
+                param[0] = SqlHelper.CreateParameter(parameterName, dbType, value);
             }
             else
             {
                 if (!value.GetType().IsArray)
                 {
-                    this.SqlParameters.Add(SqlHelper.CreateParameter(parameterName, value.GetType().GetDBType(), value));
+                    param = new SqlParameter[1];
+                    param[0] = SqlHelper.CreateParameter(parameterName, dbType, value);
                 }
                 else
                 {
                     object[] arr = (object[])value;
+                    param = new SqlParameter[arr.Length];
+
                     for (int i = 0; i < arr.Length; i++)
                     {
                         parameterName = string.Format("{0}_{1}", SqlHelper.BuildParameterName(field.Decamelize(true)), count + i);
@@ -249,11 +260,14 @@ namespace simple.sql
                         {
                             dbType = arr[i].GetType().GetDBType();
                         }
-                        this.SqlParameters.Add(SqlHelper.CreateParameter(parameterName, dbType, arr[i]));
+                        param[i] = SqlHelper.CreateParameter(parameterName, dbType, arr[i]);
                     }
                 }
             }
-            this._where.Enqueue(new KeyValuePair<string, KeyValuePair<operators, object>>(field.Decamelize(true), new KeyValuePair<operators, object>(opr, value)));
+
+            this.SqlParameters = this.SqlParameters.AddRange(param);
+            this._where.Enqueue(new KeyValuePair<string, KeyValuePair<operators, object>>(field.Decamelize(true),
+                new KeyValuePair<operators, object>(opr, param)));
         }
         private string ToSql(string term)
         {
@@ -270,38 +284,38 @@ namespace simple.sql
                 switch (item.Value.Key)
                 {
                     case operators.Eq:
-                        where = string.Format("{0} = {1}", item.Key, (SqlHelper.BuildParameterName(string.Format("{0}_{1}", fieldName, i))));
+                        where = string.Format("{0} = {1}", item.Key, ((SqlParameter[])item.Value.Value)[0].ParameterName);
                         i++;
                         break;
                     case operators.Neq:
-                        where = string.Format("{0} <> {1}", item.Key, (SqlHelper.BuildParameterName(string.Format("{0}_{1}", fieldName, i))));
+                        where = string.Format("{0} <> {1}", item.Key, ((SqlParameter[])item.Value.Value)[0].ParameterName);
                         i++;
                         break;
                     case operators.Lt:
-                        where = string.Format("{0} < {1}", item.Key, (SqlHelper.BuildParameterName(string.Format("{0}_{1}", fieldName, i))));
+                        where = string.Format("{0} < {1}", item.Key, ((SqlParameter[])item.Value.Value)[0].ParameterName);
                         i++;
                         break;
                     case operators.Le:
-                        where = string.Format("{0} <= {1}", item.Key, (SqlHelper.BuildParameterName(string.Format("{0}_{1}", fieldName, i))));
+                        where = string.Format("{0} <= {1}", item.Key, ((SqlParameter[])item.Value.Value)[0].ParameterName);
                         i++;
                         break;
                     case operators.Gt:
-                        where = string.Format("{0} > {1}", item.Key, (SqlHelper.BuildParameterName(string.Format("{0}_{1}", fieldName, i))));
+                        where = string.Format("{0} > {1}", item.Key, ((SqlParameter[])item.Value.Value)[0].ParameterName);
                         i++;
                         break;
                     case operators.Ge:
-                        where = string.Format("{0} >= {1}", item.Key, (SqlHelper.BuildParameterName(string.Format("{0}_{1}", fieldName, i))));
+                        where = string.Format("{0} >= {1}", item.Key, ((SqlParameter[])item.Value.Value)[0].ParameterName);
                         i++;
                         break;
                     case operators.Stw:
                     case operators.EnW:
                     case operators.Ctn:
-                        where = string.Format("{0} LIKE {1}", item.Key, (SqlHelper.BuildParameterName(string.Format("{0}_{1}", fieldName, i))));
+                        where = string.Format("{0} LIKE {1}", item.Key, ((SqlParameter[])item.Value.Value)[0].ParameterName);
                         i++;
                         break;
                     case operators.In:
                     case operators.Nin:
-                        var inrange = (object[])item.Value.Value;
+                        var inrange = (SqlParameter[])item.Value.Value;
                         string opt = string.Empty;
 
                         if (item.Value.Key == operators.In)
@@ -317,29 +331,29 @@ namespace simple.sql
                         {
                             if (next != 0)
                             {
-                                where += string.Format(", {0}", SqlHelper.BuildParameterName(string.Format("{0}_{1}", fieldName, i)));
+                                where += string.Format(", {0}", inrange[next].ParameterName);
                             }
                             else
                             {
-                                where += string.Format("{0}{1}", opt, SqlHelper.BuildParameterName(string.Format("{0}_{1}", fieldName, i)));
+                                where += string.Format("{0}{1}", opt, inrange[next].ParameterName);
                             }
                             i++;
                         }
                         where += ")";
                         break;
                     case operators.Btw:
-                        var from = ((object[])item.Value.Value)[0];
-                        var to = ((object[])item.Value.Value)[1];
+                        var from = ((SqlParameter[])item.Value.Value)[0];
+                        var to = ((SqlParameter[])item.Value.Value)[1];
                         where = string.Format("{0} BETWEEN ", item.Key);
-                        where += SqlHelper.BuildParameterName(string.Format("{0}_{1}", fieldName, i));
+                        where += from.ParameterName;
                         i++;
                         where += " AND ";
-                        where += SqlHelper.BuildParameterName(string.Format("{0}_{1}", fieldName, i));
+                        where += to.ParameterName;
                         i++;
                         break;
                     case operators.Or:
                         var sub = (SimpleWhere)item.Value.Value;
-                        if (sub.SqlParameters.Count == 1)
+                        if (sub.SqlParameters.Count() == 1)
                         {
                             sql.AppendLine(string.Format("OR {0}", sub.ToSql()));
                         }
