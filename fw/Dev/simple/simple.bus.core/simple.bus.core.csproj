@@ -68,6 +68,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="attribute\AutoColumnAttribute.cs" />
+    <Compile Include="attribute\PrimaryKeyAttribute.cs" />
     <Compile Include="context\IBContext.cs" />
     <Compile Include="model\BEntity.cs" />
     <Compile Include="model\BModel.cs" />

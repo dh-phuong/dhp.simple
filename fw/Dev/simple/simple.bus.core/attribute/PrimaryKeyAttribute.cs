@@ -7,17 +7,17 @@ using System.Threading.Tasks;
 namespace simple.bus.core.attribute
 {
     /// <summary>
-    /// Auto Column
+    /// PrimaryKey Column
     /// </summary>
     [AttributeUsage(AttributeTargets.Property, Inherited = false, AllowMultiple = false)]
-    public sealed class AutoColumnAttribute : Attribute
+    public sealed class PrimaryKeyAttribute : Attribute
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="AutoColumnAttribute"/> class.
+        /// Initializes a new instance of the <see cref="PrimaryKeyAttribute"/> class.
         /// </summary>
-        public AutoColumnAttribute()
+        public PrimaryKeyAttribute()
         {
-          
+
         }
 
         /// <summary>
@@ -28,6 +28,4 @@ namespace simple.bus.core.attribute
         /// </value>
         public int NamedInt { get; set; }
     }
-
-   
 }
