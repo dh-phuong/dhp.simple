@@ -52,15 +52,28 @@ namespace simple.bus.core.model
         }
 
         /// <summary>
-        /// Gets the member names of properties.
+        /// Gets the member name of columns.
         /// </summary>
         /// <returns></returns>
-        public IEnumerable<string> GetMemberNames()
+        public IEnumerable<string> GetColumNames()
         {
             return this.GetType().GetProperties()
                                               .Where(p => p.CanRead && p.CanWrite
                                                   && !p.CustomAttributes.Any(s => s.AttributeType.Equals(typeof(AutoColumnAttribute))))
                                               .Select(it => it.Name.Decamelize(true));
+        }
+
+        /// <summary>
+        /// Gets the pk values.
+        /// </summary>
+        /// <returns></returns>
+        public IDictionary<string, object> GetPK()
+        {
+            return this.GetType().GetProperties()
+                                             .Where(p => p.CanRead && p.CanWrite
+                                                 && p.CustomAttributes.Any(s => s.AttributeType.Equals(typeof(PrimaryKeyAttribute))))
+                                             .ToDictionary(k => k.Name, v => v.GetValue(this, null));
+            
         }
     }
 }
