@@ -323,9 +323,9 @@ namespace simple.sql
                 {
                     Trace.WriteLine(" - [WHERE] :" + sql);
                     Trace.WriteLine(" - [SqlParameters] :");
-                    for (int next = 0; next < this.Where.SqlParameters.Count; next++)
+                    foreach (var item in this.Where.SqlParameters)
                     {
-                        Trace.WriteLine(string.Format("{0} : {1}", this.Where.SqlParameters[next], this.Where.SqlParameters[next].Value));
+                        Trace.WriteLine(string.Format("{0} : {1}", item, item.Value));
                     }
                 }
 #endif
