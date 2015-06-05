@@ -4,6 +4,7 @@ using System.Data.Common;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using simple.bus.core.attribute;
 using simple.bus.core.model;
 
 namespace testfw.model
@@ -19,6 +20,13 @@ namespace testfw.model
         {
         }
 
+        /// <summary>
+        /// Gets or sets the user cd.
+        /// </summary>
+        /// <value>
+        /// The user cd.
+        /// </value>
+        [PrimaryKey]
         public string UserCd { get; set; }
 
         public string LoginId { get; set; }
