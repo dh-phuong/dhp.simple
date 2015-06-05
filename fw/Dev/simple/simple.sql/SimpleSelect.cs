@@ -150,63 +150,7 @@ namespace simple.sql
                 this._container.Enqueue(fields[i].Decamelize(true));
             }
             IList<IDictionary<string, object>> resDto = new List<IDictionary<string, object>>();
-            SqlCommand cmd = new SqlCommand();
-            var sql = this.GetSimpleSelectQuerry();
-
-            #region Where
-            if (this.Where != null)
-            {
-                sql += "WHERE \r\n\t";
-                sql += this.Where.ToSql();
-                cmd.Parameters.AddRange(this.Where.SqlParameters.ToArray());
-            }
-            #endregion
-
-            #region Group By
-            IList<string> groups = new List<string>();
-            while (this._groupColumns.Count > 0)
-            {
-                groups.Add(this._groupColumns.Dequeue());
-            }
-            if (groups.Count > 0)
-            {
-                sql += "GROUP BY \r\n\t  ";
-                sql += string.Join("\r\n\t, ", groups);
-                sql += "\r\n";
-            }
-            #endregion
-
-            #region OrderBy
-            IList<string> orders = new List<string>();
-            while (this._orderColumns.Count > 0)
-            {
-                orders.Add(this._orderColumns.Dequeue());
-            }
-            if (orders.Count > 0)
-            {
-                sql += "ORDER BY \r\n\t  ";
-                sql += string.Join("\r\n\t, ", orders);
-                sql += "\r\n";
-            }
-            #endregion
-
-            cmd.CommandText = sql;
-            #region Log
-#if DEBUG
-            {
-                Trace.WriteLine(" - [SQL] :\r\n" + sql);
-                if (this.Where != null)
-                {
-                    Trace.WriteLine(" - [SqlParameters] :");
-                    foreach (var item in this.Where.SqlParameters)
-                    {
-                        Trace.WriteLine(string.Format("{0} : {1}", item, item.Value));
-                    }
-                }
-
-            }
-#endif
-            #endregion
+            var cmd = this.SelectCommand();
             using (DbDataReader dr = this.Service.Context.ExecuteReader(cmd))
             {
                 while (dr.Read())
@@ -217,8 +161,6 @@ namespace simple.sql
                     {
                         var column = dr.GetName(i).Camelize();
                         var val = dr[dr.GetName(i)];
-
-                        //item[i] = dr[names[i].Decamelize().ToLower()];
                         item.Add(new KeyValuePair<string, object>(column, val));
                     }
                     resDto.Add(item);
@@ -320,11 +262,20 @@ namespace simple.sql
         #endregion Querry
 
         #region Non-Querry
+        /// <summary>
+        /// Inserts the specified t.
+        /// </summary>
+        /// <param name="t">The t.</param>
+        /// <returns></returns>
         public int Insert(T t)
         {
             this.ParseToParam(this._container, t);
             return this.Insert();
         }
+        /// <summary>
+        /// Inserts this instance.
+        /// </summary>
+        /// <returns></returns>
         public int Insert()
         {
             SqlCommand cmd = new SqlCommand(this.GetSimpleInsertQuerry());
@@ -336,11 +287,20 @@ namespace simple.sql
             }
             return this.Service.Context.ExecuteNonQuerySql(cmd);
         }
+        /// <summary>
+        /// Updates the specified t.
+        /// </summary>
+        /// <param name="t">The t.</param>
+        /// <returns></returns>
         public int Update(T t)
         {
             this.ParseToParam(this._container, t);
             return this.Update();
         }
+        /// <summary>
+        /// Updates this instance.
+        /// </summary>
+        /// <returns></returns>
         public int Update()
         {
             SqlCommand cmd = new SqlCommand();
@@ -385,6 +345,10 @@ namespace simple.sql
             var result = this.Service.Context.ExecuteNonQuerySql(cmd);
             return result;
         }
+        /// <summary>
+        /// Deletes this instance.
+        /// </summary>
+        /// <returns></returns>
         public int Delete()
         {
             SqlCommand cmd = new SqlCommand();
@@ -445,69 +409,12 @@ namespace simple.sql
         /// <summary>
         /// Gets the list result.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
         /// <returns></returns>
         public IEnumerable<T> GetListResult()
         {
             try
             {
-                SqlCommand cmd = new SqlCommand();
-                var sql = this.GetSimpleSelectQuerry();
-
-                #region Where 
-                if (this.Where != null)
-                {
-                    sql += "WHERE \r\n\t";
-                    sql += this.Where.ToSql();
-                    cmd.Parameters.AddRange(this.Where.SqlParameters.ToArray());
-                }
-                #endregion
-
-                #region Group By
-                IList<string> groups = new List<string>();
-                while (this._groupColumns.Count > 0)
-                {
-                    groups.Add(this._groupColumns.Dequeue());
-                }
-                if (groups.Count > 0)
-                {
-                    sql += "GROUP BY \r\n\t  ";
-                    sql += string.Join("\r\n\t, ", groups);
-                    sql += "\r\n";
-                }
-                #endregion
-
-                #region OrderBy
-                IList<string> orders = new List<string>();
-                while (this._orderColumns.Count > 0)
-                {
-                    orders.Add(this._orderColumns.Dequeue());
-                }
-                if (orders.Count > 0)
-                {
-                    sql += "ORDER BY \r\n\t  ";
-                    sql += string.Join("\r\n\t, ", orders);
-                    sql += "\r\n";
-                }
-                #endregion
-                
-                cmd.CommandText = sql;
-                #region Log
-#if DEBUG
-                {
-                    Trace.WriteLine(" - [SQL] :\r\n" + sql);
-                    if (this.Where != null)
-                    {
-                        Trace.WriteLine(" - [SqlParameters] :");
-                        foreach (var item in this.Where.SqlParameters)
-                        {
-                            Trace.WriteLine(string.Format("{0} : {1}", item, item.Value));
-                        }
-                    }
-                    
-                }
-#endif
-                #endregion
+                var cmd = this.SelectCommand();
                 return this.Service.Context.GetData<T>(cmd);
             }
             catch (Exception ex)
@@ -518,6 +425,10 @@ namespace simple.sql
         #endregion Public Method
 
         #region SQL String
+        /// <summary>
+        /// Gets the simple select querry.
+        /// </summary>
+        /// <returns></returns>
         private string GetSimpleSelectQuerry()
         {
             T t = Activator.CreateInstance<T>();
@@ -557,6 +468,10 @@ namespace simple.sql
             sql.AppendLine("FROM " + tableName + " ");
             return sql.ToString();
         }
+        /// <summary>
+        /// Gets the simple delete querry.
+        /// </summary>
+        /// <returns></returns>
         private string GetSimpleDeleteQuerry()
         {
             StringBuilder sql = new StringBuilder();
@@ -567,6 +482,10 @@ namespace simple.sql
             sql.AppendLine("delete_flag = 1 ");
             return sql.ToString();
         }
+        /// <summary>
+        /// Gets the simple insert querry.
+        /// </summary>
+        /// <returns></returns>
         private string GetSimpleInsertQuerry()
         {
             T t = Activator.CreateInstance<T>();
@@ -594,6 +513,10 @@ namespace simple.sql
             #endregion
             return sql.ToString();
         }
+        /// <summary>
+        /// Gets the simple update querry.
+        /// </summary>
+        /// <returns></returns>
         private string GetSimpleUpdateQuerry()
         {
             StringBuilder sql = new StringBuilder();
@@ -618,6 +541,7 @@ namespace simple.sql
         /// </summary>
         /// <param name="queue">The queue.</param>
         /// <param name="t">The object model.</param>
+        /// <exception cref="System.Exception">Duplicate parameter</exception>
         private void ParseToParam(Queue<object> queue , T t)
         {
             var columns = t.GetColumNames();
@@ -643,6 +567,72 @@ namespace simple.sql
                 }
             });
 #endif
+        }
+
+        /// <summary>
+        /// Selects the command.
+        /// </summary>
+        /// <returns></returns>
+        private SqlCommand SelectCommand()
+        {
+            SqlCommand cmd = new SqlCommand();
+            var sql = this.GetSimpleSelectQuerry();
+
+            #region Where
+            if (this.Where != null)
+            {
+                sql += "WHERE \r\n\t";
+                sql += this.Where.ToSql();
+                cmd.Parameters.AddRange(this.Where.SqlParameters.ToArray());
+            }
+            #endregion
+
+            #region Group By
+            IList<string> groups = new List<string>();
+            while (this._groupColumns.Count > 0)
+            {
+                groups.Add(this._groupColumns.Dequeue());
+            }
+            if (groups.Count > 0)
+            {
+                sql += "GROUP BY \r\n\t  ";
+                sql += string.Join("\r\n\t, ", groups);
+                sql += "\r\n";
+            }
+            #endregion
+
+            #region OrderBy
+            IList<string> orders = new List<string>();
+            while (this._orderColumns.Count > 0)
+            {
+                orders.Add(this._orderColumns.Dequeue());
+            }
+            if (orders.Count > 0)
+            {
+                sql += "ORDER BY \r\n\t  ";
+                sql += string.Join("\r\n\t, ", orders);
+                sql += "\r\n";
+            }
+            #endregion
+
+            cmd.CommandText = sql;
+            #region Log
+#if DEBUG
+            {
+                Trace.WriteLine(" - [SQL] :\r\n" + sql);
+                if (this.Where != null)
+                {
+                    Trace.WriteLine(" - [SqlParameters] :");
+                    foreach (var item in this.Where.SqlParameters)
+                    {
+                        Trace.WriteLine(string.Format("{0} : {1}", item, item.Value));
+                    }
+                }
+
+            }
+#endif
+            #endregion
+            return cmd;
         }
         #endregion
     }
