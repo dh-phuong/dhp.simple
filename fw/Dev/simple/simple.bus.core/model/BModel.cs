@@ -44,6 +44,10 @@ namespace simple.bus.core.model
             return (T)base.MemberwiseClone();
         }
 
+        public void CopyFrom<T1>(T1 source)
+        {
+
+        }
         #endregion Clone
 
         public override string ToString()
@@ -55,11 +59,17 @@ namespace simple.bus.core.model
         /// Gets the member name of columns.
         /// </summary>
         /// <returns></returns>
-        public IEnumerable<string> GetColumNames()
+        public IEnumerable<string> GetColumNames(bool getAll = false)
         {
             return this.GetType().GetProperties()
-                                              .Where(p => p.CanRead && p.CanWrite
-                                                  && !p.CustomAttributes.Any(s => s.AttributeType.Equals(typeof(AutoColumnAttribute))))
+                                              .Where
+                                              (p => p.CanRead && p.CanWrite
+                                                  && 
+                                                  (
+                                                  getAll ||
+                                                  !p.CustomAttributes.Any(s => s.AttributeType.Equals(typeof(AutoColumnAttribute))
+                                                  )
+                                              ))
                                               .Select(it => it.Name.Decamelize(true));
         }
 

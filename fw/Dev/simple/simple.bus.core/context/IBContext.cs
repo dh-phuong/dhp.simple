@@ -25,7 +25,7 @@ namespace simple.bus.core.context
         IEnumerable<T> GetData<T>(SqlCommand cmd);
     }
 
-    internal class DBContext : IBContext, IDisposable
+    public class DBContext : IBContext, IDisposable
     {
         #region 内部変数
 

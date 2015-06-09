@@ -4,7 +4,7 @@ using simple.bus.core.attribute;
 
 namespace simple.bus.core.model
 {
-    public abstract class BEntity<T> : BModel<T>
+    public class BEntity<T> : BModel<T>
         where T : class
     {
         #region Constructor
@@ -36,7 +36,7 @@ namespace simple.bus.core.model
         /// The identifier.
         /// </value>
         [AutoColumn()]
-        public decimal Id { get; set; }
+        public decimal Id { get; internal set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether [delete flag].
@@ -86,7 +86,7 @@ namespace simple.bus.core.model
         /// The version number.
         /// </value>
         [AutoColumn]
-        public int VersionNumber { get; set; }
+        public int VersionNumber { get; internal set; }
         #endregion Base
     }
 }

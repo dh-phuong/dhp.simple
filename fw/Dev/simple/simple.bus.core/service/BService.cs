@@ -16,7 +16,7 @@ namespace simple.bus.core.service
     {
         public IBContext Context { get; set; }
 
-        public BService()
+        public BService(IBContext ctx)
         {
             this.Context = new DBContext();
         }
@@ -35,10 +35,14 @@ namespace simple.bus.core.service
             var nowDate = this.NowDate;
             entity.CreateDate = nowDate;
             entity.UpdateDate = nowDate;
-            entity.VersionNumber = 1;
             entity.DeleteFlag = false;
             entity.UpdateUCd = "10";
             entity.CreateUCd = "10";
+        }
+
+        public void SetContext(IBContext ctx)
+        {
+            this.Context = ctx;
         }
 
         /// <summary>
