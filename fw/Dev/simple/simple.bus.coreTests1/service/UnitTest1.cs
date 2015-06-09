@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NUnit.Framework;
+using simple.bus.core.context;
 using simple.bus.core.service;
 using simple.sql;
 using testfw.model;
@@ -14,6 +15,11 @@ namespace simple.bus.coreTests1.service
      [TestFixture()]
     public class UserServiceTests : BService<MUserSp>
     {
+         public UserServiceTests()
+            : base(new DBContext())
+        {
+
+        }
         [Test()]
          public void SingleTest()
         {
