@@ -13,49 +13,7 @@ using simple.helper;
 
 namespace simple.sql
 {
-    public static class Simple
-    {
-        public static SimpleSelect<T> SimpleSelect<T>(this BService<T> service, SimpleWhere where
-                                                    , [CallerMemberName]string callerMemberName = "")
-            where T : BModel<T>
-        {
-
-            #region Log
-#if DEBUG
-            {
-                Trace.Write(" - [CallerMemberName] :" + callerMemberName);
-            }
-#endif
-            #endregion
-
-            return new SimpleSelect<T>()
-            {
-                Service = service,
-                Where = where,
-            };
-        }
-
-        public static SimpleSelect<T> SimpleSelect<T>(this BService<T> service
-                                                    , [CallerMemberName]string callerMemberName = "")
-            where T : BModel<T>
-        {
-
-            #region Log
-#if DEBUG
-            {
-                Trace.Write(" - [CallerMemberName] :" + callerMemberName);
-            }
-#endif
-            #endregion
-
-            return new SimpleSelect<T>()
-            {
-                Service = service,
-            };
-        }
-    }
-
-    public sealed class SimpleSelect<T>
+    public sealed class SimpleSelect<T> : ISimpleSelect<T>
         where T : BModel<T>
     {
         #region Enum
@@ -65,7 +23,7 @@ namespace simple.sql
         /// </summary>
         private enum ExecuteType
         {
-            AutoSql = 0,
+            SimpleSql = 0,
             Text = 1,
             Stored = 2,
             [ObsoleteAttribute("This option will ready on later vesion. thank you", false)]
@@ -97,6 +55,7 @@ namespace simple.sql
         #endregion Enum
 
         #region Property
+        private ExecuteType _executeType = ExecuteType.SimpleSql;
         private readonly Queue<object> _container = new Queue<object>();
         private readonly Queue<string> _orderColumns = new Queue<string>();
         private readonly Queue<string> _maxColumns = new Queue<string>();
@@ -174,7 +133,7 @@ namespace simple.sql
         /// <param name="column">The field.</param>
         /// <param name="value">The value.</param>
         /// <returns></returns>
-        public SimpleSelect<T> Set(string column, object value)
+        public ISimpleSelect<T> Set(string column, object value)
         {
             this._container.Enqueue(new Tuple<string, object>(column.Decamelize(true), value));
             return this;
@@ -184,7 +143,7 @@ namespace simple.sql
         /// </summary>
         /// <param name="fields">The fields.</param>
         /// <returns></returns>
-        public SimpleSelect<T> Min(params string[] fields)
+        public ISimpleSelect<T> Min(params string[] fields)
         {
             if (fields != null)
             {
@@ -200,7 +159,7 @@ namespace simple.sql
         /// </summary>
         /// <param name="fields">The fields.</param>
         /// <returns></returns>
-        public SimpleSelect<T> Max(params string[] fields)
+        public ISimpleSelect<T> Max(params string[] fields)
         {
             if (fields != null)
             {
@@ -216,7 +175,7 @@ namespace simple.sql
         /// </summary>
         /// <param name="fields">The fields.</param>
         /// <returns></returns>
-        public SimpleSelect<T> Sum(params string[] fields)
+        public ISimpleSelect<T> Sum(params string[] fields)
         {
             if (fields != null)
             {
@@ -232,7 +191,7 @@ namespace simple.sql
         /// </summary>
         /// <param name="fields">The fields.</param>
         /// <returns></returns>
-        public SimpleSelect<T> OrderBy(params string[] fields)
+        public ISimpleSelect<T> OrderBy(params string[] fields)
         {
             if (fields != null)
             {
@@ -248,7 +207,7 @@ namespace simple.sql
         /// </summary>
         /// <param name="fields">The fields.</param>
         /// <returns></returns>
-        public SimpleSelect<T> GroupBy(params string[] fields)
+        public ISimpleSelect<T> GroupBy(params string[] fields)
         {
             if (fields != null)
             {
@@ -259,6 +218,14 @@ namespace simple.sql
             }
             return this;
         }
+
+        public Int32 Count()
+        {
+            this._container.Enqueue("COUNT(*)");
+            var cmd = this.SelectCommand();
+            var count = this.Service.Context.ExecuteScalar(cmd);
+            return (Int32)count;
+        }
         #endregion Querry
 
         #region Non-Querry
@@ -267,16 +234,18 @@ namespace simple.sql
         /// </summary>
         /// <param name="t">The t.</param>
         /// <returns></returns>
-        public int Insert(T t)
+        public decimal Insert(T t)
         {
             this.ParseToParam(this._container, t);
-            return this.Insert();
+            var entity = t as BEntity<T>;
+            entity.SetMemberName("Id", this.Insert());
+            return entity.Id;
         }
         /// <summary>
         /// Inserts this instance.
         /// </summary>
         /// <returns></returns>
-        public int Insert()
+        public decimal Insert()
         {
             SqlCommand cmd = new SqlCommand(this.GetSimpleInsertQuerry());
             while (this._container.Count > 0)
@@ -285,7 +254,8 @@ namespace simple.sql
                 cmd.Parameters.Add(SqlHelper.CreateParameter(param.Item1, param.Item2));
                 Trace.WriteLine(param);
             }
-            return this.Service.Context.ExecuteNonQuerySql(cmd);
+            var id = this.Service.Context.ExecuteScalar(cmd);
+            return (decimal)id;
         }
         /// <summary>
         /// Updates the specified t.
@@ -443,7 +413,7 @@ namespace simple.sql
             {
                 columns = columns.AddRange(this._container.Cast<string>()).ToList();
             }
-            else 
+            else
             {
                 columns = t.GetColumNames(true).ToArray();
             }
@@ -495,6 +465,7 @@ namespace simple.sql
             string cols = string.Join(", ", columns);
             sql.AppendFormat("INSERT INTO {0}(", tableName);
             sql.AppendLine(cols + ") ");
+            sql.AppendLine("OUTPUT INSERTED.id ");
             sql.Append("VALUES(");
             for (int i = 0; i < columns.Length; i++)
             {
@@ -502,15 +473,6 @@ namespace simple.sql
             }
             string param = string.Join(", ", columns);
             sql.AppendLine(param + ") ");
-            
-            #region Log
-#if DEBUG
-            {
-                Trace.WriteLine(" - [COL]:");
-                Trace.WriteLine(sql);
-            }
-#endif
-            #endregion
             return sql.ToString();
         }
         /// <summary>
@@ -542,7 +504,8 @@ namespace simple.sql
         /// <param name="queue">The queue.</param>
         /// <param name="t">The object model.</param>
         /// <exception cref="System.Exception">Duplicate parameter</exception>
-        private void ParseToParam(Queue<object> queue , T t)
+        private void ParseToParam<E>(Queue<object> queue, E t)
+            where E : BModel<E>
         {
             var columns = t.GetColumNames();
 #if DEBUG
@@ -634,6 +597,207 @@ namespace simple.sql
             #endregion
             return cmd;
         }
+        #endregion
+
+        #region From Stored
+        internal SimpleSelect<T> Execute(string storedName, BReqDto reqDto)
+        {
+            this._executeType = ExecuteType.Stored;
+            this.ParseToParam(this._container, reqDto);
+            return this;
+        }
+        #endregion
+    }
+
+    public sealed class SimpleSelectFromSQLFile<T> : ISimpleSelectFromSQLFile<T>
+         where T : BModel<T>
+    {
+        private readonly Queue<object> _container = new Queue<object>();
+        internal BService<T> Service { get; set; }
+        internal string URLFile { set; get; }
+
+        #region FromFile
+        internal ISimpleSelectFromSQLFile<T> Load(string urlFile, BReqDto reqDto)
+        {
+            this.ParseToParam(this._container, reqDto);
+            this.URLFile = urlFile;
+            return this;
+        }
+        #endregion
+
+        #region Private
+        /// <summary>
+        /// Parses to parameter.
+        /// </summary>
+        /// <param name="queue">The queue.</param>
+        /// <param name="t">The object model.</param>
+        /// <exception cref="System.Exception">Duplicate parameter</exception>
+        private void ParseToParam<E>(Queue<object> queue, E t)
+            where E : BModel<E>
+        {
+            if (t != null)
+            {
+                var columns = t.GetColumNames();
+#if DEBUG
+                foreach (var s in columns)
+                {
+                    if (queue.Any(c => ((Tuple<string, object>)c).Item1.Equals(s)))
+                    {
+                        throw new Exception("Duplicate parameter");
+                    }
+                    queue.Enqueue(new Tuple<string, object>(s, t.GetMemberValue(s)));
+                }
+#else
+            columns.AsParallel<string>().ForAll(s =>
+            {
+                lock(this)
+                {
+                    if (queue.Any(c => ((Tuple<string, object>)c).Item1.Equals(s)))
+                    {
+                        throw new Exception("Duplicate parameter");
+                    }
+                    queue.Enqueue(new Tuple<string, object>(s, t.GetMemberValue(s)));
+                }
+            });
+#endif
+            }
+        }
+
+        private SqlCommand SqlCommand()
+        {
+            SqlCommand cmd = new SqlCommand();
+            string sql = string.Empty;
+            using (var stream = new System.IO.StreamReader(this.URLFile, Encoding.UTF8))
+            {
+                sql = stream.ReadToEnd();
+
+                stream.Close();
+            }
+            while (this._container.Count > 0)
+            {
+                var param = (Tuple<string, object>)this._container.Dequeue();
+                cmd.Parameters.Add(SqlHelper.CreateParameter(param.Item1, param.Item2));
+            }
+            cmd.CommandText = sql;
+            #region Log
+#if DEBUG
+            {
+                Trace.WriteLine(" - [SQL] :\r\n" + sql);
+                Trace.WriteLine("\r\n");
+                Trace.WriteLine(" - [Parameters] :\r\n");
+                foreach (SqlParameter parameter in cmd.Parameters)
+                {
+                    Trace.WriteLine(string.Format("{0} : {1}", parameter.ParameterName, parameter.Value));
+                }
+            }
+#endif
+            #endregion
+            return cmd;
+        }
+        #endregion
+
+        #region ISimple<T> Members
+        public IList<IDictionary<string, object>> Get()
+        {
+            IList<IDictionary<string, object>> resDto = new List<IDictionary<string, object>>();
+            var cmd = this.SqlCommand();
+            using (DbDataReader dr = this.Service.Context.ExecuteReader(cmd))
+            {
+                while (dr.Read())
+                {
+                    IDictionary<string, object> item = new Dictionary<string, object>();
+                    var cols = new object[dr.FieldCount];
+                    for (int i = 0; i < cols.Length; i++)
+                    {
+                        var column = dr.GetName(i).Camelize();
+                        var val = dr[dr.GetName(i)];
+                        item.Add(new KeyValuePair<string, object>(column, val));
+                    }
+                    resDto.Add(item);
+                }
+            }
+            return resDto;
+        }
+
+        public int Count()
+        {
+            throw new NotImplementedException();
+        }
+
+        public decimal Insert(T t)
+        {
+            throw new NotImplementedException();
+        }
+
+        public decimal Insert()
+        {
+            throw new NotImplementedException();
+        }
+
+        public int Update(T t)
+        {
+            throw new NotImplementedException();
+        }
+
+        public int Update()
+        {
+            throw new NotImplementedException();
+        }
+
+        public int Delete()
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Singles this instance.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        /// <exception cref="System.NullReferenceException"></exception>
+        public T Single()
+        {
+            T t = this.SingleOrDefault();
+            if (t == null)
+            {
+                throw new NullReferenceException();
+            }
+            return t;
+        }
+
+        /// <summary>
+        /// Singles the or default.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public T SingleOrDefault()
+        {
+            try
+            {
+                return this.GetListResult().SingleOrDefault();
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+        /// <summary>
+        /// Gets the list result.
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerable<T> GetListResult()
+        {
+            try
+            {
+                var cmd = this.SqlCommand();
+                return this.Service.Context.GetData<T>(cmd);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
         #endregion
     }
 }
