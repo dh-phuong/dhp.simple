@@ -572,6 +572,12 @@ namespace simple.sql
     public sealed class SimpleSelectFromSQLFile<T> : ISimpleSelectFromSQLFile<T>
          where T : BModel<T>
     {
+        #region Contructor
+        internal SimpleSelectFromSQLFile()
+        {
+        }
+        #endregion
+
         private readonly Queue<object> _container = new Queue<object>();
         internal BService<T> Service { get; set; }
         internal string URLFile { set; get; }
