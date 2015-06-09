@@ -16,46 +16,7 @@ namespace simple.sql
     public sealed class SimpleSelect<T> : ISimpleSelect<T>
         where T : BModel<T>
     {
-        #region Enum
-
-        /// <summary>
-        /// Execute Type
-        /// </summary>
-        private enum ExecuteType
-        {
-            SimpleSql = 0,
-            Text = 1,
-            Stored = 2,
-            [ObsoleteAttribute("This option will ready on later vesion. thank you", false)]
-            SqlFile = 3
-        }
-
-        /// <summary>
-        /// Command
-        /// </summary>
-        private enum Command
-        {
-            /// <summary>
-            /// The select
-            /// </summary>
-            Select = 0,
-            /// <summary>
-            /// The insert
-            /// </summary>
-            Insert = 1,
-            /// <summary>
-            /// The update
-            /// </summary>
-            Update = 2,
-            /// <summary>
-            /// The delete
-            /// </summary>
-            Delete = 3,
-        }
-        #endregion Enum
-
         #region Property
-        private ExecuteType _executeType = ExecuteType.SimpleSql;
         private readonly Queue<object> _container = new Queue<object>();
         private readonly Queue<string> _orderColumns = new Queue<string>();
         private readonly Queue<string> _maxColumns = new Queue<string>();
@@ -602,7 +563,6 @@ namespace simple.sql
         #region From Stored
         internal SimpleSelect<T> Execute(string storedName, BReqDto reqDto)
         {
-            this._executeType = ExecuteType.Stored;
             this.ParseToParam(this._container, reqDto);
             return this;
         }
@@ -796,6 +756,16 @@ namespace simple.sql
             {
                 throw ex;
             }
+        }
+
+        #endregion
+
+        #region ISimpleSelectFromSQLFile<T> Members
+
+
+        public int Execute()
+        {
+            return 0;
         }
 
         #endregion
