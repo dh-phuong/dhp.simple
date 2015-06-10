@@ -70,7 +70,7 @@ namespace simple.bus.core.model
                                                   !p.CustomAttributes.Any(s => s.AttributeType.Equals(typeof(AutoColumnAttribute))
                                                   )
                                               ))
-                                              .Select(it => it.Name.Decamelize(true));
+                                              .Select(it =>  it.Name.Decamelize(true));
         }
 
         /// <summary>
