@@ -642,7 +642,23 @@ namespace simple.sql
             while (this._container.Count > 0)
             {
                 var param = (Tuple<string, object>)this._container.Dequeue();
-                cmd.Parameters.Add(SqlHelper.CreateParameter(param.Item1, param.Item2));
+                if (param.Item2.GetType().IsArray)
+                {
+                    object[] arr = (object[])param.Item2;
+                    IList<string> arrParam = new List<string>();
+                    for (int i = 0; i < arr.Length; i++)
+                    {
+                         var rename = string.Format("{0}_{1}",param.Item1, i + 1);
+                         arrParam.Add(SqlHelper.BuildParameterName(rename));
+                         cmd.Parameters.Add(SqlHelper.CreateParameter(rename, arr[i]));
+                    }
+                    sql = sql.Replace(SqlHelper.BuildParameterName(param.Item1), string.Join(", ", arrParam));
+                }
+                else
+                {
+                    cmd.Parameters.Add(SqlHelper.CreateParameter(param.Item1, param.Item2));
+                }
+                
             }
             cmd.CommandText = sql;
             #region Log
