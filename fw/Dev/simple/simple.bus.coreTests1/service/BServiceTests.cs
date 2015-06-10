@@ -108,10 +108,22 @@ namespace simple.bus.core.service.Tests
         [Test()]
         public void ExcecuteFromStoredTest()
         {
-            this.SimpleSelectFromStored("P_M_User_GetByLoginID", new GetByLoginIDRequestDto
+            this.SimpleSelectFromStored("P_M_User_GetByLoginID", new GetByManyLoginIDRequestDto
             {
-                LoginId = "dh-phuong"
-            }).SingleOrDefault();
+                LoginId = new string[] { "dh-phuong", "nth-loan", "ptt-truc", "pta-thu"}
+            }).GetListResult();
+        }
+
+        [Test()]
+        public void ExcecuteFromFileTest_Array_GetListResult()
+        {
+            var ret = this.SimpleSelectFromSQLFile(@"file/GetManyByLoginID.sql", new GetByManyLoginIDRequestDto
+            {
+                LoginId = new string[] { "dh-phuong", "nth-loan", "ptt-truc", "pta-thu" }
+
+            }).GetListResult();
+
+            Assert.Greater(ret.Count(), 0);
         }
     }
 }

@@ -111,6 +111,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="file\GetManyByLoginID.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="file\GetMessages.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

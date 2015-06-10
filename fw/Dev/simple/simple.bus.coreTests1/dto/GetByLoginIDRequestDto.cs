@@ -11,4 +11,9 @@ namespace simple.bus.coreTests1.dto
     {
         public string LoginId { get; set; }
     }
+
+    public sealed class GetByManyLoginIDRequestDto : BReqDto
+    {
+        public string[] LoginId { get; set; }
+    }
 }
