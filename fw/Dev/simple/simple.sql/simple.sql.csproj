@@ -51,6 +51,7 @@
   <ItemGroup>
     <Compile Include="interface\ISimpleSelect.cs" />
     <Compile Include="interface\ISimpleSelectFromSQLFile.cs" />
+    <Compile Include="interface\ISimpleSelectFromStored.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SimpleParameter.cs" />
     <Compile Include="SimpleSelect.cs" />

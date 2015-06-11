@@ -68,6 +68,13 @@ namespace simple.sql
                                                     , [CallerMemberName]string callerMemberName = "")
             where T : BModel<T>
         {
+            #region Log
+#if DEBUG
+            {
+                Trace.Write(" - [CallerMemberName] :" + callerMemberName);
+            }
+#endif
+            #endregion
             return new SimpleSelectFromSQLFile<T>()
             {
                 Service = service,
@@ -83,16 +90,23 @@ namespace simple.sql
         /// <param name="reqDto">The req dto.</param>
         /// <param name="callerMemberName">Name of the caller member.</param>
         /// <returns></returns>
-        public static SimpleSelect<T> SimpleSelectFromStored<T>(this BService<T> service
+        public static ISimpleSelectFromStored<T> SimpleSelectFromStored<T>(this BService<T> service
                                                     , string storedProcedureName
                                                     , BReqDto reqDto
                                                     , [CallerMemberName]string callerMemberName = "")
             where T : BModel<T>
         {
-            return new SimpleSelect<T>()
+            #region Log
+#if DEBUG
+            {
+                Trace.Write(" - [CallerMemberName] :" + callerMemberName);
+            }
+#endif
+            #endregion
+            return new SimpleSelectFromStored<T>()
             {
                 Service = service,
-            }.Execute(storedProcedureName, reqDto);
+            }.Load(storedProcedureName, reqDto);
         }
     }
 }
