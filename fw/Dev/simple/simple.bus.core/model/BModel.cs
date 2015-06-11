@@ -4,9 +4,12 @@ using System.Collections.Generic;
 using System.Data.Common;
 using simple.helper;
 using simple.bus.core.attribute;
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
 
 namespace simple.bus.core.model
 {
+    [Serializable]
     public abstract class BModel<T>
         where T : class
     {
@@ -45,8 +48,22 @@ namespace simple.bus.core.model
         }
 
         public void CopyFrom<T1>(T1 source)
+            where T1 : BModel<T1>
         {
-
+            var c1 = this.GetColumNames(true);
+            var c2 = source.GetColumNames(true);
+            var innerJoin = c1.Where(col => c2.Any(desCol => desCol.Equals(col))).Select(col => col);
+#if DEBUG
+            foreach (var column in innerJoin)
+            {
+                this.SetMemberName(column, source.GetMemberValue(column));
+            }
+#else
+            innerJoin.AsParallel<string>().ForAll(s =>
+            {
+                this.SetMemberName(s, source.GetMemberValue(s));
+            });
+#endif
         }
         #endregion Clone
 
