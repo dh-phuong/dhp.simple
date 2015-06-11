@@ -17,13 +17,21 @@ namespace simple.sql
         where T : BModel<T>
     {
         #region Property
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private readonly Queue<object> _container = new Queue<object>();
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private readonly Queue<string> _orderColumns = new Queue<string>();
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private readonly Queue<string> _maxColumns = new Queue<string>();
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private readonly Queue<string> _minColumns = new Queue<string>();
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private readonly Queue<string> _sumColumns = new Queue<string>();
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private readonly Queue<string> _groupColumns = new Queue<string>();
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         internal BService<T> Service { get; set; }
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         internal SimpleWhere Where { get; set; }
         #endregion
 
@@ -559,14 +567,6 @@ namespace simple.sql
             return cmd;
         }
         #endregion
-
-        #region From Stored
-        internal SimpleSelect<T> Execute(string storedName, BReqDto reqDto)
-        {
-            this.ParseToParam(this._container, reqDto);
-            return this;
-        }
-        #endregion
     }
 
     public sealed class SimpleSelectFromSQLFile<T> : ISimpleSelectFromSQLFile<T>
@@ -578,8 +578,13 @@ namespace simple.sql
         }
         #endregion
 
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private readonly Queue<object> _container = new Queue<object>();
+
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         internal BService<T> Service { get; set; }
+
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         internal string URLFile { set; get; }
 
         #region FromFile
@@ -648,9 +653,9 @@ namespace simple.sql
                     IList<string> arrParam = new List<string>();
                     for (int i = 0; i < arr.Length; i++)
                     {
-                         var rename = string.Format("{0}_{1}",param.Item1, i + 1);
-                         arrParam.Add(SqlHelper.BuildParameterName(rename));
-                         cmd.Parameters.Add(SqlHelper.CreateParameter(rename, arr[i]));
+                        var rename = string.Format("{0}_{1}", param.Item1, i + 1);
+                        arrParam.Add(SqlHelper.BuildParameterName(rename));
+                        cmd.Parameters.Add(SqlHelper.CreateParameter(rename, arr[i]));
                     }
                     sql = sql.Replace(SqlHelper.BuildParameterName(param.Item1), string.Join(", ", arrParam));
                 }
@@ -658,7 +663,7 @@ namespace simple.sql
                 {
                     cmd.Parameters.Add(SqlHelper.CreateParameter(param.Item1, param.Item2));
                 }
-                
+
             }
             cmd.CommandText = sql;
             #region Log
@@ -699,36 +704,6 @@ namespace simple.sql
                 }
             }
             return resDto;
-        }
-
-        public int Count()
-        {
-            throw new NotImplementedException();
-        }
-
-        public decimal Insert(T t)
-        {
-            throw new NotImplementedException();
-        }
-
-        public decimal Insert()
-        {
-            throw new NotImplementedException();
-        }
-
-        public int Update(T t)
-        {
-            throw new NotImplementedException();
-        }
-
-        public int Update()
-        {
-            throw new NotImplementedException();
-        }
-
-        public int Delete()
-        {
-            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -783,11 +758,203 @@ namespace simple.sql
         #endregion
 
         #region ISimpleSelectFromSQLFile<T> Members
+        public int Execute()
+        {
+            try
+            {
+                var cmd = this.SqlCommand();
+                return this.Service.Context.ExecuteNonQuerySql(cmd);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
 
+        #endregion
+    }
+
+    public sealed class SimpleSelectFromStored<T> : ISimpleSelectFromStored<T>
+         where T : BModel<T>
+    {
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        private readonly Queue<object> _container = new Queue<object>();
+
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        internal BService<T> Service { get; set; }
+
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        internal string StoredName { set; get; }
+
+        #region Contructor
+        internal SimpleSelectFromStored()
+        {
+        }
+        #endregion
+
+        #region From Stored
+        internal SimpleSelectFromStored<T> Load(string storedName, BReqDto reqDto)
+        {
+            this.StoredName = storedName;
+            this.ParseToParam(this._container, reqDto);
+            return this;
+        }
+        #endregion
+
+        #region ISimple<T> Members
+
+        /// <summary>
+        /// Singles this instance.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        /// <exception cref="System.NullReferenceException"></exception>
+        public T Single()
+        {
+            T t = this.SingleOrDefault();
+            if (t == null)
+            {
+                throw new NullReferenceException();
+            }
+            return t;
+        }
+
+        /// <summary>
+        /// Singles the or default.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public T SingleOrDefault()
+        {
+            try
+            {
+                return this.GetListResult().SingleOrDefault();
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+        /// <summary>
+        /// Gets the list result.
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerable<T> GetListResult()
+        {
+            try
+            {
+                var cmd = this.SqlCommand();
+                return this.Service.Context.GetData<T>(cmd);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        #endregion
+
+        #region Private
+        /// <summary>
+        /// Parses to parameter.
+        /// </summary>
+        /// <param name="queue">The queue.</param>
+        /// <param name="t">The object model.</param>
+        /// <exception cref="System.Exception">Duplicate parameter</exception>
+        private void ParseToParam<E>(Queue<object> queue, E t)
+            where E : BModel<E>
+        {
+            if (t != null)
+            {
+                var columns = t.GetColumNames();
+#if DEBUG
+                foreach (var s in columns)
+                {
+                    if (queue.Any(c => ((Tuple<string, object>)c).Item1.Equals(s)))
+                    {
+                        throw new Exception("Duplicate parameter");
+                    }
+                    queue.Enqueue(new Tuple<string, object>(s, t.GetMemberValue(s)));
+                }
+#else
+            columns.AsParallel<string>().ForAll(s =>
+            {
+                lock(this)
+                {
+                    if (queue.Any(c => ((Tuple<string, object>)c).Item1.Equals(s)))
+                    {
+                        throw new Exception("Duplicate parameter");
+                    }
+                    queue.Enqueue(new Tuple<string, object>(s, t.GetMemberValue(s)));
+                }
+            });
+#endif
+            }
+        }
+
+        private SqlCommand SqlCommand()
+        {
+            SqlCommand cmd = new SqlCommand();
+            string sql = this.StoredName;
+            while (this._container.Count > 0)
+            {
+                var param = (Tuple<string, object>)this._container.Dequeue();
+                cmd.Parameters.Add(SqlHelper.CreateParameter(param.Item1, param.Item2));
+            }
+            cmd.CommandText = sql;
+            cmd.CommandType = System.Data.CommandType.StoredProcedure;
+            #region Log
+#if DEBUG
+            {
+                Trace.WriteLine(" - [SQL] :\r\n" + sql);
+                Trace.WriteLine("\r\n");
+                Trace.WriteLine(" - [Parameters] :\r\n");
+                foreach (SqlParameter parameter in cmd.Parameters)
+                {
+                    Trace.WriteLine(string.Format("{0} : {1}", parameter.ParameterName, parameter.Value));
+                }
+            }
+#endif
+            #endregion
+            return cmd;
+        } 
+        #endregion
+
+        #region ISimpleSelectFromStored<T> Members
+
+        public IList<IDictionary<string, object>> Get()
+        {
+            IList<IDictionary<string, object>> resDto = new List<IDictionary<string, object>>();
+            var cmd = this.SqlCommand();
+            using (DbDataReader dr = this.Service.Context.ExecuteReader(cmd))
+            {
+                while (dr.Read())
+                {
+                    IDictionary<string, object> item = new Dictionary<string, object>();
+                    var cols = new object[dr.FieldCount];
+                    for (int i = 0; i < cols.Length; i++)
+                    {
+                        var column = dr.GetName(i).Camelize();
+                        var val = dr[dr.GetName(i)];
+                        item.Add(new KeyValuePair<string, object>(column, val));
+                    }
+                    resDto.Add(item);
+                }
+            }
+            return resDto;
+        }
 
         public int Execute()
         {
-            return 0;
+            try
+            {
+                var cmd = this.SqlCommand();
+                return this.Service.Context.ExecuteNonQuerySql(cmd);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
 
         #endregion
