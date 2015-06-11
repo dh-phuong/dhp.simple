@@ -52,7 +52,7 @@ namespace simple.bus.core.model
         /// <value>
         /// The create user cd.
         /// </value>
-        public string CreateUCd { get; set; }
+        public int CreateUId { get; set; }
 
         /// <summary>
         /// Gets or sets the update u cd.
@@ -60,7 +60,7 @@ namespace simple.bus.core.model
         /// <value>
         /// The update user cd.
         /// </value>
-        public string UpdateUCd { get; set; }
+        public int UpdateUId { get; set; }
 
         /// <summary>
         /// Gets or sets the create date.
@@ -78,7 +78,6 @@ namespace simple.bus.core.model
         /// </value>
         public DateTime UpdateDate { get; set; }
 
-
         /// <summary>
         /// Gets or sets the version number.
         /// </summary>
@@ -86,7 +85,8 @@ namespace simple.bus.core.model
         /// The version number.
         /// </value>
         [AutoColumn]
-        public int VersionNumber { get; internal set; }
+        public int VersionNo { get; internal set; }
+
         #endregion Base
     }
 }

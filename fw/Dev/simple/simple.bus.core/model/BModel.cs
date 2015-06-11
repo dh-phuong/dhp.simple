@@ -1,24 +1,33 @@
 ﻿using System;
-using System.Linq;
 using System.Collections.Generic;
 using System.Data.Common;
-using simple.helper;
+using System.Linq;
 using simple.bus.core.attribute;
-using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
+using simple.helper;
 
 namespace simple.bus.core.model
 {
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     [Serializable]
     public abstract class BModel<T>
         where T : class
     {
         #region Constructor
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="BModel{T}"/> class.
+        /// </summary>
         public BModel()
         {
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="BModel{T}"/> class.
+        /// </summary>
+        /// <param name="dr">The dr.</param>
         public BModel(DbDataReader dr)
         {
             var properties = typeof(T).GetProperties();
@@ -28,7 +37,7 @@ namespace simple.bus.core.model
                 {
                     var name = propInfo.Name.Decamelize().ToLower();
                     if (dr[name] != DBNull.Value)
-                        propInfo.SetValue(this, dr[name], null);
+                        propInfo.SetValue(this, Convert.ChangeType(dr[name], propInfo.PropertyType), null);
                 }
             }
         }
@@ -65,8 +74,15 @@ namespace simple.bus.core.model
             });
 #endif
         }
+
         #endregion Clone
 
+        /// <summary>
+        /// Returns a <see cref="System.String" /> that represents this instance.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="System.String" /> that represents this instance.
+        /// </returns>
         public override string ToString()
         {
             return StringHelper.Me.ToJson<object>(this);
@@ -81,13 +97,13 @@ namespace simple.bus.core.model
             return this.GetType().GetProperties()
                                               .Where
                                               (p => p.CanRead && p.CanWrite
-                                                  && 
+                                                  &&
                                                   (
                                                   getAll ||
                                                   !p.CustomAttributes.Any(s => s.AttributeType.Equals(typeof(AutoColumnAttribute))
                                                   )
                                               ))
-                                              .Select(it =>  it.Name.Decamelize(true));
+                                              .Select(it => it.Name.Decamelize(true));
         }
 
         /// <summary>
@@ -100,7 +116,6 @@ namespace simple.bus.core.model
                                              .Where(p => p.CanRead && p.CanWrite
                                                  && p.CustomAttributes.Any(s => s.AttributeType.Equals(typeof(PrimaryKeyAttribute))))
                                              .ToDictionary(k => k.Name, v => v.GetValue(this, null));
-            
         }
     }
 }

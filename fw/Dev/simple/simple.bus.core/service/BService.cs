@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using simple.bus.core.model;
 using simple.bus.core.context;
+using simple.bus.core.model;
 
 namespace simple.bus.core.service
 {
@@ -30,14 +27,14 @@ namespace simple.bus.core.service
         }
 
         public void SetUpdateInfo<E>(E entity)
-            where E: BEntity<E>
+            where E : BEntity<E>
         {
             var nowDate = this.NowDate;
             entity.CreateDate = nowDate;
             entity.UpdateDate = nowDate;
             entity.DeleteFlag = false;
-            entity.UpdateUCd = "10";
-            entity.CreateUCd = "10";
+            entity.UpdateUId = 10;
+            entity.CreateUId = 10;
         }
 
         public void SetContext(IBContext ctx)

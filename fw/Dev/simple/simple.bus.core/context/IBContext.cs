@@ -3,9 +3,6 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Data.SqlClient;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace simple.bus.core.context
 {
@@ -15,13 +12,21 @@ namespace simple.bus.core.context
     public interface IBContext
     {
         void BeginTransaction();
+
         void BeginTransaction(IsolationLevel isolationLevel);
+
         Boolean Commit();
+
         Boolean Rollback();
+
         int ExecuteNonQuerySql(SqlCommand cmd);
+
         object ExecuteScalar(SqlCommand cmd);
+
         DbDataReader ExecuteReader(SqlCommand cmd);
+
         DataTable GetDataTable(SqlCommand cmd);
+
         IEnumerable<T> GetData<T>(SqlCommand cmd);
     }
 
@@ -42,7 +47,7 @@ namespace simple.bus.core.context
         /// </summary>
         public DBContext()
         {
-            this._connectionString = @"Data Source=192.168.1.36\SQLEXPRESS;Initial Catalog=IM20130724;User ID=sa;Password=123456;Connection Timeout=90";
+            this._connectionString = @"Data Source=192.168.1.36\SQLEXPRESS;Initial Catalog=DBTEST;User ID=sa;Password=123456;Connection Timeout=90";
             this.Connect();
         }
 
@@ -76,7 +81,8 @@ namespace simple.bus.core.context
         private Boolean Connect(string connectionString)
         {
             return dbConnect(connectionString);
-        }        
+        }
+
         #endregion メソッド
 
         #region 内部処理
@@ -218,7 +224,6 @@ namespace simple.bus.core.context
             return cmd.ExecuteScalar();
         }
 
-
         /// <summary>
         /// Executes the reader.
         /// </summary>
@@ -241,19 +246,16 @@ namespace simple.bus.core.context
             IList<T> results = new List<T>();
             cmd.Connection = this.sqlCon;
             if (this.sqlTran != null) cmd.Transaction = this.sqlTran;
-            lock (this)
+            using (DbDataReader dr = cmd.ExecuteReader())
             {
-                using (DbDataReader dr = cmd.ExecuteReader())
+                while (dr.Read())
                 {
-                    while (dr.Read())
-                    {
-                        yield return (T)typeof(T).GetConstructor(new System.Type[] { typeof(DbDataReader) }).Invoke(new object[] { dr });
-                    }
+                    yield return (T)typeof(T).GetConstructor(new System.Type[] { typeof(DbDataReader) }).Invoke(new object[] { dr });
                 }
             }
             //return results;
         }
 
-        #endregion
+        #endregion IBContext Members
     }
 }

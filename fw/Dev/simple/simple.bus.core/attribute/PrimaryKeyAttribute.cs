@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace simple.bus.core.attribute
 {
@@ -17,7 +13,6 @@ namespace simple.bus.core.attribute
         /// </summary>
         public PrimaryKeyAttribute()
         {
-
         }
 
         /// <summary>
