@@ -1,21 +1,15 @@
-﻿using Microsoft.VisualBasic;
-using System;
-using System.Collections;
+﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Diagnostics;
-
 
 using System.Data.SqlClient;
-using System.Text;
 using simple.helper;
 
 namespace simple.sql
 {
-
-    /// <summary> 
-    /// SQL Server データベース接続に必要な機能を提供します。このクラスはインスタンス化できません。 
-    /// </summary> 
+    /// <summary>
+    /// SQL Server データベース接続に必要な機能を提供します。このクラスはインスタンス化できません。
+    /// </summary>
     public sealed class SqlHelper
     {
         private SqlHelper()
@@ -24,38 +18,39 @@ namespace simple.sql
 
         #region "クラス変数"
 
-        /// <summary> 
-        /// パラメータ文字列の記号を表します。 
-        /// </summary> 
+        /// <summary>
+        /// パラメータ文字列の記号を表します。
+        /// </summary>
 
         public const char ParameterToken = '@';
-        /// <summary> 
-        /// SqlParameter 配列をキャッシュする容量の初期値を表します。 
-        /// </summary> 
+        /// <summary>
+        /// SqlParameter 配列をキャッシュする容量の初期値を表します。
+        /// </summary>
 
         private const int cacheParametersCapacity = 10;
-        /// <summary> 
-        /// SqlParameter 配列を格納する辞書 (キーと値のコレクション) を表します。 
-        /// </summary> 
+        /// <summary>
+        /// SqlParameter 配列を格納する辞書 (キーと値のコレクション) を表します。
+        /// </summary>
 
         private static Dictionary<string, SqlParameter[]> cachedPrms = new Dictionary<string, SqlParameter[]>(cacheParametersCapacity);
-        /// <summary> 
-        /// 接続タイムアウトを表します。 
-        /// </summary> 
+        /// <summary>
+        /// 接続タイムアウトを表します。
+        /// </summary>
 
         private static int m_timeout = 15;
-        /// <summary> 
-        /// パケット サイズを表します。 
-        /// </summary> 
+        /// <summary>
+        /// パケット サイズを表します。
+        /// </summary>
 
         private const int packetSize = 8000;
-        #endregion
+
+        #endregion "クラス変数"
 
         #region "静的プロパティ"
 
-        /// <summary> 
-        /// 規定の接続タイムアウトを取得または設定します。 
-        /// </summary> 
+        /// <summary>
+        /// 規定の接続タイムアウトを取得または設定します。
+        /// </summary>
         public static int Timeout
         {
             get { return m_timeout; }
@@ -70,20 +65,19 @@ namespace simple.sql
             }
         }
 
-        #endregion
+        #endregion "静的プロパティ"
 
         #region "静的メソッド"
 
         #region "BuildParameterName メソッド"
 
-        /// <summary> 
-        /// 指定された名称のパラメータ文字列を生成し返します。 
-        /// </summary> 
-        /// <param name="name">パラメータ名</param> 
-        /// <returns>パラメータ文字列</returns> 
+        /// <summary>
+        /// 指定された名称のパラメータ文字列を生成し返します。
+        /// </summary>
+        /// <param name="name">パラメータ名</param>
+        /// <returns>パラメータ文字列</returns>
         public static string BuildParameterName(string name)
         {
-
             if (name == null)
             {
                 throw new ArgumentNullException("name", "name パラメータが null (Visual Basic in Nothing) 参照です。");
@@ -93,7 +87,7 @@ namespace simple.sql
                 throw new ArgumentException("name パラメータが未指定です。");
             }
 
-            // 先頭がパラメータ文字以外の場合は先頭に付加 
+            // 先頭がパラメータ文字以外の場合は先頭に付加
             if (name[0] != ParameterToken)
             {
                 name = string.Format("{0}in_{1}", ParameterToken, name);
@@ -101,21 +95,21 @@ namespace simple.sql
             return name;
         }
 
-        #endregion
+        #endregion "BuildParameterName メソッド"
 
         #region "CreateConnectionString メソッド"
 
-        /// <summary> 
-        /// 指定された値を使用して接続文字列を生成し、返します (Windows 認証を使用する場合は userId と password に null を指定してください) 。 
-        /// </summary> 
-        /// <param name="instanceName">インスタンス名</param> 
-        /// <param name="databaseName">データベース名</param> 
-        /// <param name="userId">ユーザー ID</param> 
-        /// <param name="password">パスワード</param> 
-        /// <param name="connectTimeout">接続タイムアウト</param> 
-        /// <returns>接続文字列</returns> 
-        /// <exception cref="ArgumentNullException">instanceName, databaseName パラメータのいずれかが null 参照の場合に発生します。</exception> 
-        /// <remarks>userId パラメータと password パラメータが共に null 参照の場合は Windows 認証を使用した接続文字列を返します。</remarks> 
+        /// <summary>
+        /// 指定された値を使用して接続文字列を生成し、返します (Windows 認証を使用する場合は userId と password に null を指定してください) 。
+        /// </summary>
+        /// <param name="instanceName">インスタンス名</param>
+        /// <param name="databaseName">データベース名</param>
+        /// <param name="userId">ユーザー ID</param>
+        /// <param name="password">パスワード</param>
+        /// <param name="connectTimeout">接続タイムアウト</param>
+        /// <returns>接続文字列</returns>
+        /// <exception cref="ArgumentNullException">instanceName, databaseName パラメータのいずれかが null 参照の場合に発生します。</exception>
+        /// <remarks>userId パラメータと password パラメータが共に null 参照の場合は Windows 認証を使用した接続文字列を返します。</remarks>
         public static string CreateConnectionString(string instanceName, string databaseName, string userId, string password, int connectTimeout)
         {
             SqlConnectionStringBuilder scsb = null;
@@ -132,13 +126,13 @@ namespace simple.sql
 
             try
             {
-                // userId と password が共に null 参照の場合は Windows 認証 (true) を使用する。それ以外は SQL Server 認証 (false) を使用する 
+                // userId と password が共に null 参照の場合は Windows 認証 (true) を使用する。それ以外は SQL Server 認証 (false) を使用する
                 bool integratedSecurity = (userId == null && password == null);
 
-                // リフレクタからエントリ アセンブリを取得 
+                // リフレクタからエントリ アセンブリを取得
                 asm = System.Reflection.Assembly.GetEntryAssembly();
 
-                // 接続文字列生成 
+                // 接続文字列生成
                 scsb = new SqlConnectionStringBuilder();
                 scsb.DataSource = instanceName;
                 scsb.InitialCatalog = databaseName;
@@ -166,29 +160,30 @@ namespace simple.sql
             }
         }
 
-        /// <summary> 
-        /// 指定された値と規定の接続試行時間を使用して接続文字列を生成し、返します (Windows 認証を使用する場合は userId と password に null を指定してください) 。 
-        /// </summary> 
-        /// <param name="instanceName">インスタンス名</param> 
-        /// <param name="databaseName">データベース名</param> 
-        /// <param name="userId">ユーザー ID</param> 
-        /// <param name="password">パスワード</param> 
-        /// <returns>接続文字列</returns> 
+        /// <summary>
+        /// 指定された値と規定の接続試行時間を使用して接続文字列を生成し、返します (Windows 認証を使用する場合は userId と password に null を指定してください) 。
+        /// </summary>
+        /// <param name="instanceName">インスタンス名</param>
+        /// <param name="databaseName">データベース名</param>
+        /// <param name="userId">ユーザー ID</param>
+        /// <param name="password">パスワード</param>
+        /// <returns>接続文字列</returns>
         public static string CreateConnectionString(string instanceName, string databaseName, string userId, string password)
         {
             return CreateConnectionString(instanceName, databaseName, userId, password, Timeout);
         }
 
-        #endregion
+        #endregion "CreateConnectionString メソッド"
 
         #region "CreateParameter メソッド"
-        /// <summary> 
-        /// SqlParameter インスタンスを生成します。 
-        /// </summary> 
-        /// <param name="parameterName">パラメータ名</param> 
-        /// <param name="dbType">パラメータの種類</param> 
-        /// <param name="value">パラメータの値</param> 
-        /// <returns>SqlParameter インスタンス</returns> 
+
+        /// <summary>
+        /// SqlParameter インスタンスを生成します。
+        /// </summary>
+        /// <param name="parameterName">パラメータ名</param>
+        /// <param name="dbType">パラメータの種類</param>
+        /// <param name="value">パラメータの値</param>
+        /// <returns>SqlParameter インスタンス</returns>
         public static SqlParameter CreateParameter(string parameterName, object value)
         {
             if (parameterName == null)
@@ -214,13 +209,13 @@ namespace simple.sql
             return prm;
         }
 
-        /// <summary> 
-        /// SqlParameter インスタンスを生成します。 
-        /// </summary> 
-        /// <param name="parameterName">パラメータ名</param> 
-        /// <param name="dbType">パラメータの種類</param> 
-        /// <param name="value">パラメータの値</param> 
-        /// <returns>SqlParameter インスタンス</returns> 
+        /// <summary>
+        /// SqlParameter インスタンスを生成します。
+        /// </summary>
+        /// <param name="parameterName">パラメータ名</param>
+        /// <param name="dbType">パラメータの種類</param>
+        /// <param name="value">パラメータの値</param>
+        /// <returns>SqlParameter インスタンス</returns>
         public static SqlParameter CreateParameter(string parameterName, SqlDbType dbType, object value)
         {
             if (parameterName == null)
@@ -237,15 +232,15 @@ namespace simple.sql
             return prm;
         }
 
-        /// <summary> 
-        /// SqlParameter インスタンスを生成します。 
-        /// </summary> 
-        /// <param name="parameterName">パラメータ名</param> 
-        /// <param name="dbType">パラメータの種類</param> 
-        /// <param name="size">パラメータのサイズ</param> 
-        /// <param name="direction">パラメータの方向</param> 
-        /// <param name="value">パラメータの値</param> 
-        /// <returns>SqlParameter インスタンス</returns> 
+        /// <summary>
+        /// SqlParameter インスタンスを生成します。
+        /// </summary>
+        /// <param name="parameterName">パラメータ名</param>
+        /// <param name="dbType">パラメータの種類</param>
+        /// <param name="size">パラメータのサイズ</param>
+        /// <param name="direction">パラメータの方向</param>
+        /// <param name="value">パラメータの値</param>
+        /// <returns>SqlParameter インスタンス</returns>
         public static SqlParameter CreateParameter(string parameterName, SqlDbType dbType, int size, ParameterDirection direction, object value)
         {
             if (parameterName == null)
@@ -264,7 +259,7 @@ namespace simple.sql
                     throw new ArgumentNullException("value", "value パラメータが null (Nothing in Visual Basic) 参照です。");
                 }
             }
-            
+
             SqlParameter prm = new SqlParameter(BuildParameterName(parameterName), dbType, size);
             prm.Direction = direction;
             prm.IsNullable = true;
@@ -273,31 +268,31 @@ namespace simple.sql
             return prm;
         }
 
-        /// <summary> 
-        /// SqlParameter インスタンスを生成します。パラメータの値には DBNull を規定値とします。 
-        /// </summary> 
-        /// <param name="parameterName">パラメータ名</param> 
-        /// <param name="dbType">パラメータの種類</param> 
-        /// <param name="size">パラメータのサイズ</param> 
-        /// <param name="direction">パラメータの方向</param> 
-        /// <returns>SqlParameter インスタンス</returns> 
+        /// <summary>
+        /// SqlParameter インスタンスを生成します。パラメータの値には DBNull を規定値とします。
+        /// </summary>
+        /// <param name="parameterName">パラメータ名</param>
+        /// <param name="dbType">パラメータの種類</param>
+        /// <param name="size">パラメータのサイズ</param>
+        /// <param name="direction">パラメータの方向</param>
+        /// <returns>SqlParameter インスタンス</returns>
         public static SqlParameter CreateParameter(string parameterName, SqlDbType dbType, int size, ParameterDirection direction)
         {
             return CreateParameter(parameterName, dbType, size, direction, DBNull.Value);
         }
 
-        /// <summary> 
-        /// SqlParameter インスタンスを生成します。 
-        /// </summary> 
-        /// <param name="parameterName">パラメータ名</param> 
-        /// <param name="dbType">パラメータの種類</param> 
-        /// <param name="size">パラメータのサイズ</param> 
-        /// <param name="precision">桁数 (整数部＋小数部)</param> 
-        /// <param name="scale">小数部桁数</param> 
-        /// <param name="direction">パラメータの方向</param> 
-        /// <param name="value">パラメータの値</param> 
-        /// <returns>SqlParameter インスタンス</returns> 
-        /// <remarks>このメソッドは dbType パラメータが SqlDbType.Decimal の場合に使用します。これ以外の場合は prevision パラメータと scale パラメータは無視されます。</remarks> 
+        /// <summary>
+        /// SqlParameter インスタンスを生成します。
+        /// </summary>
+        /// <param name="parameterName">パラメータ名</param>
+        /// <param name="dbType">パラメータの種類</param>
+        /// <param name="size">パラメータのサイズ</param>
+        /// <param name="precision">桁数 (整数部＋小数部)</param>
+        /// <param name="scale">小数部桁数</param>
+        /// <param name="direction">パラメータの方向</param>
+        /// <param name="value">パラメータの値</param>
+        /// <returns>SqlParameter インスタンス</returns>
+        /// <remarks>このメソッドは dbType パラメータが SqlDbType.Decimal の場合に使用します。これ以外の場合は prevision パラメータと scale パラメータは無視されます。</remarks>
         public static SqlParameter CreateParameter(string parameterName, SqlDbType dbType, int size, byte precision, byte scale, ParameterDirection direction, object value)
         {
             if (parameterName == null)
@@ -331,34 +326,34 @@ namespace simple.sql
             return prm;
         }
 
-        /// <summary> 
-        /// SqlParameter インスタンスを生成します。パラメータの値には DBNull を規定値とします。 
-        /// </summary> 
-        /// <param name="parameterName">パラメータ名</param> 
-        /// <param name="dbType">パラメータの種類</param> 
-        /// <param name="size">パラメータのサイズ</param> 
-        /// <param name="precision">桁数 (整数部＋小数部)</param> 
-        /// <param name="scale">小数部桁数</param> 
-        /// <param name="direction">パラメータの方向</param> 
-        /// <returns>SqlParameter インスタンス</returns> 
-        /// <remarks>このメソッドは dbType パラメータが SqlDbType.Decimal の場合に使用します。これ以外の場合は prevision パラメータと scale パラメータは無視されます。</remarks> 
+        /// <summary>
+        /// SqlParameter インスタンスを生成します。パラメータの値には DBNull を規定値とします。
+        /// </summary>
+        /// <param name="parameterName">パラメータ名</param>
+        /// <param name="dbType">パラメータの種類</param>
+        /// <param name="size">パラメータのサイズ</param>
+        /// <param name="precision">桁数 (整数部＋小数部)</param>
+        /// <param name="scale">小数部桁数</param>
+        /// <param name="direction">パラメータの方向</param>
+        /// <returns>SqlParameter インスタンス</returns>
+        /// <remarks>このメソッドは dbType パラメータが SqlDbType.Decimal の場合に使用します。これ以外の場合は prevision パラメータと scale パラメータは無視されます。</remarks>
         public static SqlParameter CreateParameter(string parameterName, SqlDbType dbType, int size, byte precision, byte scale, ParameterDirection direction)
         {
             return CreateParameter(parameterName, dbType, size, precision, scale, direction, DBNull.Value);
         }
 
-        #endregion
+        #endregion "CreateParameter メソッド"
 
         #region "ExecuteNonQuery メソッド"
 
-        /// <summary> 
-        /// コマンドを実行し、影響を受けた行数を返します。 
-        /// </summary> 
-        /// <param name="conStr">接続文字列</param> 
-        /// <param name="cmdType">コマンド文字列の解釈方法</param> 
-        /// <param name="cmdText">コマンド文字列</param> 
-        /// <param name="cmdPrms">コマンド パラメータ</param> 
-        /// <returns>影響を受けた行数</returns> 
+        /// <summary>
+        /// コマンドを実行し、影響を受けた行数を返します。
+        /// </summary>
+        /// <param name="conStr">接続文字列</param>
+        /// <param name="cmdType">コマンド文字列の解釈方法</param>
+        /// <param name="cmdText">コマンド文字列</param>
+        /// <param name="cmdPrms">コマンド パラメータ</param>
+        /// <returns>影響を受けた行数</returns>
         public static int ExecuteNonQuery(string conStr, CommandType cmdType, string cmdText, params SqlParameter[] cmdPrms)
         {
             try
@@ -378,14 +373,14 @@ namespace simple.sql
             }
         }
 
-        /// <summary> 
-        /// コマンドを実行し、影響を受けた行数を返します。 
-        /// </summary> 
-        /// <param name="con">接続</param> 
-        /// <param name="cmdType">コマンド文字列の解釈方法</param> 
-        /// <param name="cmdText">コマンド文字列</param> 
-        /// <param name="cmdPrms">コマンド パラメータ</param> 
-        /// <returns>影響を受けた行数</returns> 
+        /// <summary>
+        /// コマンドを実行し、影響を受けた行数を返します。
+        /// </summary>
+        /// <param name="con">接続</param>
+        /// <param name="cmdType">コマンド文字列の解釈方法</param>
+        /// <param name="cmdText">コマンド文字列</param>
+        /// <param name="cmdPrms">コマンド パラメータ</param>
+        /// <returns>影響を受けた行数</returns>
         public static int ExecuteNonQuery(SqlConnection con, CommandType cmdType, string cmdText, params SqlParameter[] cmdPrms)
         {
             bool closed = true;
@@ -415,14 +410,14 @@ namespace simple.sql
             }
         }
 
-        /// <summary> 
-        /// コマンドを実行し、影響を受けた行数を返します。 
-        /// </summary> 
-        /// <param name="trans">トランザクション</param> 
-        /// <param name="cmdType">コマンド文字列の解釈方法</param> 
-        /// <param name="cmdText">コマンド文字列</param> 
-        /// <param name="cmdPrms">コマンド パラメータ</param> 
-        /// <returns>影響を受けた行数</returns> 
+        /// <summary>
+        /// コマンドを実行し、影響を受けた行数を返します。
+        /// </summary>
+        /// <param name="trans">トランザクション</param>
+        /// <param name="cmdType">コマンド文字列の解釈方法</param>
+        /// <param name="cmdText">コマンド文字列</param>
+        /// <param name="cmdPrms">コマンド パラメータ</param>
+        /// <returns>影響を受けた行数</returns>
         public static int ExecuteNonQuery(SqlTransaction trans, CommandType cmdType, string cmdText, params SqlParameter[] cmdPrms)
         {
             try
@@ -444,18 +439,18 @@ namespace simple.sql
             }
         }
 
-        #endregion
+        #endregion "ExecuteNonQuery メソッド"
 
         #region "ExecuteReader メソッド"
 
-        /// <summary> 
-        /// コマンドを実行し、SqlDataReader を返します。 
-        /// </summary> 
-        /// <param name="conStr">接続文字列</param> 
-        /// <param name="cmdType">コマンド文字列の解釈方法</param> 
-        /// <param name="cmdText">コマンド文字列</param> 
-        /// <param name="cmdPrms">コマンド パラメータ</param> 
-        /// <returns>SqlDataReader インスタンス</returns> 
+        /// <summary>
+        /// コマンドを実行し、SqlDataReader を返します。
+        /// </summary>
+        /// <param name="conStr">接続文字列</param>
+        /// <param name="cmdType">コマンド文字列の解釈方法</param>
+        /// <param name="cmdText">コマンド文字列</param>
+        /// <param name="cmdPrms">コマンド パラメータ</param>
+        /// <returns>SqlDataReader インスタンス</returns>
         public static SqlDataReader ExecuteReader(string conStr, CommandType cmdType, string cmdText, params SqlParameter[] cmdPrms)
         {
             SqlConnection con = null;
@@ -486,14 +481,14 @@ namespace simple.sql
             }
         }
 
-        /// <summary> 
-        /// コマンドを実行し、SqlDataReader を返します。 
-        /// </summary> 
-        /// <param name="con">接続</param> 
-        /// <param name="cmdType">コマンド文字列の解釈方法</param> 
-        /// <param name="cmdText">コマンド文字列</param> 
-        /// <param name="cmdPrms">コマンド パラメータ</param> 
-        /// <returns>SqlDataReader インスタンス</returns> 
+        /// <summary>
+        /// コマンドを実行し、SqlDataReader を返します。
+        /// </summary>
+        /// <param name="con">接続</param>
+        /// <param name="cmdType">コマンド文字列の解釈方法</param>
+        /// <param name="cmdText">コマンド文字列</param>
+        /// <param name="cmdPrms">コマンド パラメータ</param>
+        /// <returns>SqlDataReader インスタンス</returns>
         public static SqlDataReader ExecuteReader(SqlConnection con, CommandType cmdType, string cmdText, params SqlParameter[] cmdPrms)
         {
             bool closed = true;
@@ -523,14 +518,14 @@ namespace simple.sql
             }
         }
 
-        /// <summary> 
-        /// コマンドを実行し、SqlDataReader を返します。 
-        /// </summary> 
-        /// <param name="trans">トランザクション</param> 
-        /// <param name="cmdType">コマンド文字列の解釈方法</param> 
-        /// <param name="cmdText">コマンド文字列</param> 
-        /// <param name="cmdPrms">コマンド パラメータ</param> 
-        /// <returns>SqlDataReader インスタンス</returns> 
+        /// <summary>
+        /// コマンドを実行し、SqlDataReader を返します。
+        /// </summary>
+        /// <param name="trans">トランザクション</param>
+        /// <param name="cmdType">コマンド文字列の解釈方法</param>
+        /// <param name="cmdText">コマンド文字列</param>
+        /// <param name="cmdPrms">コマンド パラメータ</param>
+        /// <returns>SqlDataReader インスタンス</returns>
         public static SqlDataReader ExecuteReader(SqlTransaction trans, CommandType cmdType, string cmdText, params SqlParameter[] cmdPrms)
         {
             try
@@ -552,18 +547,18 @@ namespace simple.sql
             }
         }
 
-        #endregion
+        #endregion "ExecuteReader メソッド"
 
         #region "ExecuteScalar メソッド"
 
-        /// <summary> 
-        /// コマンドを実行し、結果セットの最初の行の最初の列の値を返します。 
-        /// </summary> 
-        /// <param name="conStr">接続文字列</param> 
-        /// <param name="cmdType">コマンド文字列の解釈方法</param> 
-        /// <param name="cmdText">コマンド文字列</param> 
-        /// <param name="cmdPrms">コマンド パラメータ</param> 
-        /// <returns>結果セットの最初の行の最初の列の値インスタンス</returns> 
+        /// <summary>
+        /// コマンドを実行し、結果セットの最初の行の最初の列の値を返します。
+        /// </summary>
+        /// <param name="conStr">接続文字列</param>
+        /// <param name="cmdType">コマンド文字列の解釈方法</param>
+        /// <param name="cmdText">コマンド文字列</param>
+        /// <param name="cmdPrms">コマンド パラメータ</param>
+        /// <returns>結果セットの最初の行の最初の列の値インスタンス</returns>
         public static object ExecuteScalar(string conStr, CommandType cmdType, string cmdText, params SqlParameter[] cmdPrms)
         {
             try
@@ -583,14 +578,14 @@ namespace simple.sql
             }
         }
 
-        /// <summary> 
-        /// コマンドを実行し、結果セットの最初の行の最初の列の値を返します。 
-        /// </summary> 
-        /// <param name="con">接続文字列</param> 
-        /// <param name="cmdType">コマンド文字列の解釈方法</param> 
-        /// <param name="cmdText">コマンド文字列</param> 
-        /// <param name="cmdPrms">コマンド パラメータ</param> 
-        /// <returns>結果セットの最初の行の最初の列の値インスタンス</returns> 
+        /// <summary>
+        /// コマンドを実行し、結果セットの最初の行の最初の列の値を返します。
+        /// </summary>
+        /// <param name="con">接続文字列</param>
+        /// <param name="cmdType">コマンド文字列の解釈方法</param>
+        /// <param name="cmdText">コマンド文字列</param>
+        /// <param name="cmdPrms">コマンド パラメータ</param>
+        /// <returns>結果セットの最初の行の最初の列の値インスタンス</returns>
         public static object ExecuteScalar(SqlConnection con, CommandType cmdType, string cmdText, params SqlParameter[] cmdPrms)
         {
             bool closed = true;
@@ -620,14 +615,14 @@ namespace simple.sql
             }
         }
 
-        /// <summary> 
-        /// コマンドを実行し、結果セットの最初の行の最初の列の値を返します。 
-        /// </summary> 
-        /// <param name="trans">トランザクション</param> 
-        /// <param name="cmdType">コマンド文字列の解釈方法</param> 
-        /// <param name="cmdText">コマンド文字列</param> 
-        /// <param name="cmdPrms">コマンド パラメータ</param> 
-        /// <returns>結果セットの最初の行の最初の列の値インスタンス</returns> 
+        /// <summary>
+        /// コマンドを実行し、結果セットの最初の行の最初の列の値を返します。
+        /// </summary>
+        /// <param name="trans">トランザクション</param>
+        /// <param name="cmdType">コマンド文字列の解釈方法</param>
+        /// <param name="cmdText">コマンド文字列</param>
+        /// <param name="cmdPrms">コマンド パラメータ</param>
+        /// <returns>結果セットの最初の行の最初の列の値インスタンス</returns>
         public static object ExecuteScalar(SqlTransaction trans, CommandType cmdType, string cmdText, params SqlParameter[] cmdPrms)
         {
             try
@@ -649,18 +644,18 @@ namespace simple.sql
             }
         }
 
-        #endregion
+        #endregion "ExecuteScalar メソッド"
 
         #region "FillDataSet メソッド"
 
-        /// <summary> 
-        /// 指定された接続文字列を使用してコマンドを実行し、結果を <see cref="DataSet"/> で返します。 
-        /// </summary> 
-        /// <param name="conStr">接続文字列</param> 
-        /// <param name="selectCmdType">コマンド文字列の解釈方法</param> 
-        /// <param name="selectCmdText">コマンド文字列</param> 
-        /// <param name="selectCmdPrms">コマンド パラメータ</param> 
-        /// <returns>コマンドを実行した結果を格納した DataSet インスタンス</returns> 
+        /// <summary>
+        /// 指定された接続文字列を使用してコマンドを実行し、結果を <see cref="DataSet"/> で返します。
+        /// </summary>
+        /// <param name="conStr">接続文字列</param>
+        /// <param name="selectCmdType">コマンド文字列の解釈方法</param>
+        /// <param name="selectCmdText">コマンド文字列</param>
+        /// <param name="selectCmdPrms">コマンド パラメータ</param>
+        /// <returns>コマンドを実行した結果を格納した DataSet インスタンス</returns>
         public static DataSet FillDataSet(string conStr, CommandType selectCmdType, string selectCmdText, params SqlParameter[] selectCmdPrms)
         {
             SqlDataAdapter da = null;
@@ -688,14 +683,14 @@ namespace simple.sql
             }
         }
 
-        /// <summary> 
-        /// 指定されたコネクションを使用してコマンドを実行し、結果を <see cref="DataSet"/> で返します。 
-        /// </summary> 
-        /// <param name="con">接続</param> 
-        /// <param name="selectCmdType">コマンド文字列の解釈方法</param> 
-        /// <param name="selectCmdText">コマンド文字列</param> 
-        /// <param name="selectCmdPrms">コマンド パラメータ</param> 
-        /// <returns>コマンドを実行した結果を格納した DataSet インスタンス</returns> 
+        /// <summary>
+        /// 指定されたコネクションを使用してコマンドを実行し、結果を <see cref="DataSet"/> で返します。
+        /// </summary>
+        /// <param name="con">接続</param>
+        /// <param name="selectCmdType">コマンド文字列の解釈方法</param>
+        /// <param name="selectCmdText">コマンド文字列</param>
+        /// <param name="selectCmdPrms">コマンド パラメータ</param>
+        /// <returns>コマンドを実行した結果を格納した DataSet インスタンス</returns>
         public static DataSet FillDataSet(SqlConnection con, CommandType selectCmdType, string selectCmdText, params SqlParameter[] selectCmdPrms)
         {
             bool closed = (con.State == ConnectionState.Closed);
@@ -724,14 +719,14 @@ namespace simple.sql
             }
         }
 
-        /// <summary> 
-        /// 指定されたトランザクションを使用してコマンドを実行し、結果を <see cref="DataSet"/> で返します。 
-        /// </summary> 
-        /// <param name="trans">トランザクション</param> 
-        /// <param name="selectCmdType">コマンド文字列の解釈方法</param> 
-        /// <param name="selectCmdText">コマンド文字列</param> 
-        /// <param name="selectCmdPrms">コマンド パラメータ</param> 
-        /// <returns>コマンドを実行した結果を格納した DataSet インスタンス</returns> 
+        /// <summary>
+        /// 指定されたトランザクションを使用してコマンドを実行し、結果を <see cref="DataSet"/> で返します。
+        /// </summary>
+        /// <param name="trans">トランザクション</param>
+        /// <param name="selectCmdType">コマンド文字列の解釈方法</param>
+        /// <param name="selectCmdText">コマンド文字列</param>
+        /// <param name="selectCmdPrms">コマンド パラメータ</param>
+        /// <returns>コマンドを実行した結果を格納した DataSet インスタンス</returns>
         public static DataSet FillDataSet(SqlTransaction trans, CommandType selectCmdType, string selectCmdText, params SqlParameter[] selectCmdPrms)
         {
             SqlDataAdapter da = null;
@@ -759,19 +754,19 @@ namespace simple.sql
             }
         }
 
-        #endregion
+        #endregion "FillDataSet メソッド"
 
         #region "FillSchemaDataSet メソッド"
 
-        /// <summary> 
-        /// 指定された接続文字列を使用してコマンドを実行し、スキーマの設定された <see cref="DataSet"/> を返します。 
-        /// </summary> 
-        /// <param name="conStr">接続文字列</param> 
-        /// <param name="schemaType">スキーマ マップ処理方法</param> 
-        /// <param name="selectCmdType">コマンド文字列の解釈方法</param> 
-        /// <param name="selectCmdText">コマンド文字列</param> 
-        /// <param name="selectCmdPrms">コマンド パラメータ</param> 
-        /// <returns>コマンドを実行した結果を格納した DataSet インスタンス</returns> 
+        /// <summary>
+        /// 指定された接続文字列を使用してコマンドを実行し、スキーマの設定された <see cref="DataSet"/> を返します。
+        /// </summary>
+        /// <param name="conStr">接続文字列</param>
+        /// <param name="schemaType">スキーマ マップ処理方法</param>
+        /// <param name="selectCmdType">コマンド文字列の解釈方法</param>
+        /// <param name="selectCmdText">コマンド文字列</param>
+        /// <param name="selectCmdPrms">コマンド パラメータ</param>
+        /// <returns>コマンドを実行した結果を格納した DataSet インスタンス</returns>
         public static DataSet FillSchemaDataSet(string conStr, SchemaType schemaType, CommandType selectCmdType, string selectCmdText, params SqlParameter[] selectCmdPrms)
         {
             SqlDataAdapter da = null;
@@ -799,15 +794,15 @@ namespace simple.sql
             }
         }
 
-        /// <summary> 
-        /// 指定されたコネクションを使用してコマンドを実行し、スキーマの設定された <see cref="DataSet"/> を返します。 
-        /// </summary> 
-        /// <param name="con">コネクション</param> 
-        /// <param name="schemaType">スキーマ マップ処理方法</param> 
-        /// <param name="selectCmdType">コマンド文字列の解釈方法</param> 
-        /// <param name="selectCmdText">コマンド文字列</param> 
-        /// <param name="selectCmdPrms">コマンド パラメータ</param> 
-        /// <returns>コマンドを実行した結果を格納した DataSet インスタンス</returns> 
+        /// <summary>
+        /// 指定されたコネクションを使用してコマンドを実行し、スキーマの設定された <see cref="DataSet"/> を返します。
+        /// </summary>
+        /// <param name="con">コネクション</param>
+        /// <param name="schemaType">スキーマ マップ処理方法</param>
+        /// <param name="selectCmdType">コマンド文字列の解釈方法</param>
+        /// <param name="selectCmdText">コマンド文字列</param>
+        /// <param name="selectCmdPrms">コマンド パラメータ</param>
+        /// <returns>コマンドを実行した結果を格納した DataSet インスタンス</returns>
         public static DataSet FillSchemaDataSet(SqlConnection con, SchemaType schemaType, CommandType selectCmdType, string selectCmdText, params SqlParameter[] selectCmdPrms)
         {
             bool closed = (con.State == ConnectionState.Closed);
@@ -836,15 +831,15 @@ namespace simple.sql
             }
         }
 
-        /// <summary> 
-        /// 指定されたトランザクションを使用してコマンドを実行し、スキーマの設定された <see cref="DataSet"/> を返します。 
-        /// </summary> 
-        /// <param name="trans">トランザクション</param> 
-        /// <param name="schemaType">スキーマ マップ処理方法</param> 
-        /// <param name="selectCmdType">コマンド文字列の解釈方法</param> 
-        /// <param name="selectCmdText">コマンド文字列</param> 
-        /// <param name="selectCmdPrms">コマンド パラメータ</param> 
-        /// <returns>コマンドを実行した結果を格納した DataSet インスタンス</returns> 
+        /// <summary>
+        /// 指定されたトランザクションを使用してコマンドを実行し、スキーマの設定された <see cref="DataSet"/> を返します。
+        /// </summary>
+        /// <param name="trans">トランザクション</param>
+        /// <param name="schemaType">スキーマ マップ処理方法</param>
+        /// <param name="selectCmdType">コマンド文字列の解釈方法</param>
+        /// <param name="selectCmdText">コマンド文字列</param>
+        /// <param name="selectCmdPrms">コマンド パラメータ</param>
+        /// <returns>コマンドを実行した結果を格納した DataSet インスタンス</returns>
         public static DataSet FillSchemaDataSet(SqlTransaction trans, SchemaType schemaType, CommandType selectCmdType, string selectCmdText, params SqlParameter[] selectCmdPrms)
         {
             SqlDataAdapter da = null;
@@ -872,21 +867,21 @@ namespace simple.sql
             }
         }
 
-        #endregion
+        #endregion "FillSchemaDataSet メソッド"
 
         #region "CreateCommand メソッド"
 
-        /// <summary> 
-        /// 指定されたパラメータで <see cref="SqlCommand"/> を生成し返します。 
-        /// </summary> 
-        /// <param name="con">コネクション</param> 
-        /// <param name="trans">トランザクション</param> 
-        /// <param name="cmdType">コマンド文字列の解釈方法</param> 
-        /// <param name="cmdText">コマンド文字列</param> 
-        /// <param name="cmdPrms">コマンド パラメータ</param> 
-        /// <returns>SqlCommand インスタンス</returns> 
-        /// <exception cref="System.ArgumentNullException">con パラメータと trans パラメータが共に null (Nothing in Visual Basic) 参照の場合に発生します。</exception> 
-        /// <exception cref="System.ArgumentException">trans パラメータのトランザクションが開始されていないか、終了している場合に発生します。</exception> 
+        /// <summary>
+        /// 指定されたパラメータで <see cref="SqlCommand"/> を生成し返します。
+        /// </summary>
+        /// <param name="con">コネクション</param>
+        /// <param name="trans">トランザクション</param>
+        /// <param name="cmdType">コマンド文字列の解釈方法</param>
+        /// <param name="cmdText">コマンド文字列</param>
+        /// <param name="cmdPrms">コマンド パラメータ</param>
+        /// <returns>SqlCommand インスタンス</returns>
+        /// <exception cref="System.ArgumentNullException">con パラメータと trans パラメータが共に null (Nothing in Visual Basic) 参照の場合に発生します。</exception>
+        /// <exception cref="System.ArgumentException">trans パラメータのトランザクションが開始されていないか、終了している場合に発生します。</exception>
         static internal SqlCommand CreateCommand(SqlConnection con, SqlTransaction trans, CommandType cmdType, string cmdText, SqlParameter[] cmdPrms)
         {
             SqlCommand cmd = null;
@@ -894,7 +889,7 @@ namespace simple.sql
 
             try
             {
-                // 引数チェック 
+                // 引数チェック
                 if (con == null && trans == null)
                 {
                     throw new ArgumentNullException("con or trans", "con パラメータと trans パラメータが共に null (Nothing in Visual Basic) 参照です。");
@@ -912,14 +907,14 @@ namespace simple.sql
                     throw new ArgumentException("cmdText パラメータが未指定です。", "cmdText");
                 }
 
-                // 接続開始 
+                // 接続開始
                 if (con != null && con.State == ConnectionState.Closed)
                 {
                     closed = true;
                     con.Open();
                 }
 
-                // コマンド生成 
+                // コマンド生成
                 if (con != null)
                 {
                     cmd = con.CreateCommand();
@@ -932,13 +927,13 @@ namespace simple.sql
                 cmd.CommandText = cmdText;
                 cmd.CommandTimeout = Timeout;
 
-                // トランザクション設定 
+                // トランザクション設定
                 if (trans != null)
                 {
                     cmd.Transaction = trans;
                 }
 
-                // パラメータ設定 
+                // パラメータ設定
                 if (cmdPrms != null)
                 {
                     foreach (SqlParameter prm in cmdPrms)
@@ -963,16 +958,16 @@ namespace simple.sql
             }
         }
 
-        #endregion
+        #endregion "CreateCommand メソッド"
 
         #region "パラメータ キャッシュ関連メソッド"
 
-        /// <summary> 
-        /// 指定されたキーで SqlParameter 配列をキャッシュします。 
-        /// </summary> 
-        /// <param name="key">キー</param> 
-        /// <param name="cmdPrms">SqlParameter 配列</param> 
-        /// <remarks>一般的に key パラメータには実行するコマンド文字列を指定します。</remarks> 
+        /// <summary>
+        /// 指定されたキーで SqlParameter 配列をキャッシュします。
+        /// </summary>
+        /// <param name="key">キー</param>
+        /// <param name="cmdPrms">SqlParameter 配列</param>
+        /// <remarks>一般的に key パラメータには実行するコマンド文字列を指定します。</remarks>
         public static void CacheParameters(string key, params SqlParameter[] cmdPrms)
         {
             if (key == null)
@@ -983,26 +978,26 @@ namespace simple.sql
             cachedPrms[key] = cmdPrms;
         }
 
-        /// <summary> 
-        /// 指定されたキーでキャッシュされた SqlParameter 配列を返します。 
-        /// </summary> 
-        /// <param name="key">キー</param> 
-        /// <returns>SqlParameter 配列</returns> 
-        /// <remarks> 
-        /// <p>指定されたキーでキャッシュされていない場合は null (Nothing in Visual Basic) を返します。</p> 
-        /// <p>一般的に key パラメータには実行するコマンド文字列を指定します。</p> 
-        /// </remarks> 
+        /// <summary>
+        /// 指定されたキーでキャッシュされた SqlParameter 配列を返します。
+        /// </summary>
+        /// <param name="key">キー</param>
+        /// <returns>SqlParameter 配列</returns>
+        /// <remarks>
+        /// <p>指定されたキーでキャッシュされていない場合は null (Nothing in Visual Basic) を返します。</p>
+        /// <p>一般的に key パラメータには実行するコマンド文字列を指定します。</p>
+        /// </remarks>
         public static SqlParameter[] GetCacheParameters(string key)
         {
             try
             {
-                // キーが存在しない場合 
+                // キーが存在しない場合
                 if (!cachedPrms.ContainsKey(key))
                 {
                     return null;
                 }
 
-                // キーから値を取得 
+                // キーから値を取得
                 SqlParameter[] cp = cachedPrms[key];
 
                 if (cp == null)
@@ -1010,7 +1005,7 @@ namespace simple.sql
                     return null;
                 }
 
-                // クローンを生成 
+                // クローンを生成
                 SqlParameter[] clonePrms = new SqlParameter[cp.Length];
                 int i = 0;
                 int j = cp.Length;
@@ -1028,18 +1023,18 @@ namespace simple.sql
             }
         }
 
-        /// <summary> 
-        /// キャッシュされた SqlParameter 配列をクリアします。 
-        /// </summary> 
+        /// <summary>
+        /// キャッシュされた SqlParameter 配列をクリアします。
+        /// </summary>
         public static void ClearCacheParameters()
         {
             cachedPrms.Clear();
         }
 
-        /// <summary> 
-        /// 指定されたキーでキャッシュされた SqlParameter 配列をキャッシュから削除します。 
-        /// </summary> 
-        /// <param name="key">キー</param> 
+        /// <summary>
+        /// 指定されたキーでキャッシュされた SqlParameter 配列をキャッシュから削除します。
+        /// </summary>
+        /// <param name="key">キー</param>
         public static void RemoveCacheParameters(string key)
         {
             if (key == null)
@@ -1050,9 +1045,8 @@ namespace simple.sql
             cachedPrms.Remove(key);
         }
 
-        #endregion
+        #endregion "パラメータ キャッシュ関連メソッド"
 
-        #endregion
-
+        #endregion "静的メソッド"
     }
 }

@@ -4,8 +4,6 @@ using System.Data.Common;
 using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Runtime.CompilerServices;
 using System.Text;
 using simple.bus.core.model;
 using simple.bus.core.service;
@@ -17,51 +15,68 @@ namespace simple.sql
         where T : BModel<T>
     {
         #region Property
+
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private readonly Queue<object> _container = new Queue<object>();
+
+        /// <summary>
+        /// The _order columns
+        /// </summary>
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private readonly Queue<string> _orderColumns = new Queue<string>();
+
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private readonly Queue<string> _maxColumns = new Queue<string>();
+
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private readonly Queue<string> _minColumns = new Queue<string>();
+
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private readonly Queue<string> _sumColumns = new Queue<string>();
+
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private readonly Queue<string> _groupColumns = new Queue<string>();
+
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         internal BService<T> Service { get; set; }
+
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         internal SimpleWhere Where { get; set; }
-        #endregion
+
+        #endregion Property
 
         #region Contructor
+
         internal SimpleSelect()
         {
         }
+
         internal SimpleSelect(SimpleWhere where)
         {
             this.Where = where;
         }
-        #endregion
+
+        #endregion Contructor
 
         #region Querry
+
         /// <summary>
         /// Gets the specified name.
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <typeparam name="ResultType">The type of the esult type.</typeparam>
-        /// <param name="fields">The column name.</param>
+        /// <param name="field">The column name.</param>
         /// <returns></returns>
-        public ResultType Get<ResultType>(string fields)
+        public ResultType Get<ResultType>(string field)
         {
-            var resDto = this.Get(fields);
+            var resDto = this.Get(field);
             if (resDto.Count > 0)
             {
-                return (ResultType)resDto[0][fields];
+                return (ResultType)resDto[0][field];
             }
             return default(ResultType);
         }
+
         /// <summary>
         /// Gets the specified names.
         /// </summary>
@@ -96,6 +111,7 @@ namespace simple.sql
             }
             return resDto;
         }
+
         /// <summary>
         /// Sets the specified field.
         /// </summary>
@@ -107,6 +123,7 @@ namespace simple.sql
             this._container.Enqueue(new Tuple<string, object>(column.Decamelize(true), value));
             return this;
         }
+
         /// <summary>
         /// Min value
         /// </summary>
@@ -123,6 +140,7 @@ namespace simple.sql
             }
             return this;
         }
+
         /// <summary>
         /// Max value
         /// </summary>
@@ -139,6 +157,7 @@ namespace simple.sql
             }
             return this;
         }
+
         /// <summary>
         /// Sum value
         /// </summary>
@@ -155,6 +174,7 @@ namespace simple.sql
             }
             return this;
         }
+
         /// <summary>
         /// Orders the by.
         /// </summary>
@@ -171,6 +191,7 @@ namespace simple.sql
             }
             return this;
         }
+
         /// <summary>
         /// Group by
         /// </summary>
@@ -195,9 +216,11 @@ namespace simple.sql
             var count = this.Service.Context.ExecuteScalar(cmd);
             return (Int32)count;
         }
+
         #endregion Querry
 
         #region Non-Querry
+
         /// <summary>
         /// Inserts the specified t.
         /// </summary>
@@ -210,6 +233,7 @@ namespace simple.sql
             entity.SetMemberName("Id", this.Insert());
             return entity.Id;
         }
+
         /// <summary>
         /// Inserts this instance.
         /// </summary>
@@ -226,6 +250,7 @@ namespace simple.sql
             var id = this.Service.Context.ExecuteScalar(cmd);
             return (decimal)id;
         }
+
         /// <summary>
         /// Updates the specified t.
         /// </summary>
@@ -236,6 +261,7 @@ namespace simple.sql
             this.ParseToParam(this._container, t);
             return this.Update();
         }
+
         /// <summary>
         /// Updates this instance.
         /// </summary>
@@ -284,6 +310,7 @@ namespace simple.sql
             var result = this.Service.Context.ExecuteNonQuerySql(cmd);
             return result;
         }
+
         /// <summary>
         /// Deletes this instance.
         /// </summary>
@@ -299,20 +326,26 @@ namespace simple.sql
                 cmd.Parameters.AddRange(this.Where.SqlParameters.ToArray());
             }
             cmd.CommandText = sql;
+
             #region Log
+
 #if DEBUG
             {
                 Trace.WriteLine(" - [SQL]:");
                 Trace.WriteLine(sql);
             }
 #endif
-            #endregion
+
+            #endregion Log
+
             var result = this.Service.Context.ExecuteNonQuerySql(cmd);
             return result;
         }
-        #endregion
+
+        #endregion Non-Querry
 
         #region Public Method
+
         /// <summary>
         /// Singles this instance.
         /// </summary>
@@ -345,6 +378,7 @@ namespace simple.sql
                 throw ex;
             }
         }
+
         /// <summary>
         /// Gets the list result.
         /// </summary>
@@ -361,9 +395,11 @@ namespace simple.sql
                 throw ex;
             }
         }
+
         #endregion Public Method
 
         #region SQL String
+
         /// <summary>
         /// Gets the simple select querry.
         /// </summary>
@@ -407,6 +443,7 @@ namespace simple.sql
             sql.AppendLine("FROM " + tableName + " ");
             return sql.ToString();
         }
+
         /// <summary>
         /// Gets the simple delete querry.
         /// </summary>
@@ -421,6 +458,7 @@ namespace simple.sql
             sql.AppendLine("delete_flag = 1 ");
             return sql.ToString();
         }
+
         /// <summary>
         /// Gets the simple insert querry.
         /// </summary>
@@ -444,6 +482,7 @@ namespace simple.sql
             sql.AppendLine(param + ") ");
             return sql.ToString();
         }
+
         /// <summary>
         /// Gets the simple update querry.
         /// </summary>
@@ -464,9 +503,11 @@ namespace simple.sql
             sql.AppendLine(cols);
             return sql.ToString();
         }
-        #endregion
+
+        #endregion SQL String
 
         #region Private
+
         /// <summary>
         /// Parses to parameter.
         /// </summary>
@@ -511,15 +552,18 @@ namespace simple.sql
             var sql = this.GetSimpleSelectQuerry();
 
             #region Where
+
             if (this.Where != null)
             {
                 sql += "WHERE \r\n\t";
                 sql += this.Where.ToSql();
                 cmd.Parameters.AddRange(this.Where.SqlParameters.ToArray());
             }
-            #endregion
+
+            #endregion Where
 
             #region Group By
+
             IList<string> groups = new List<string>();
             while (this._groupColumns.Count > 0)
             {
@@ -531,9 +575,11 @@ namespace simple.sql
                 sql += string.Join("\r\n\t, ", groups);
                 sql += "\r\n";
             }
-            #endregion
+
+            #endregion Group By
 
             #region OrderBy
+
             IList<string> orders = new List<string>();
             while (this._orderColumns.Count > 0)
             {
@@ -545,10 +591,13 @@ namespace simple.sql
                 sql += string.Join("\r\n\t, ", orders);
                 sql += "\r\n";
             }
-            #endregion
+
+            #endregion OrderBy
 
             cmd.CommandText = sql;
+
             #region Log
+
 #if DEBUG
             {
                 Trace.WriteLine(" - [SQL] :\r\n" + sql);
@@ -560,23 +609,27 @@ namespace simple.sql
                         Trace.WriteLine(string.Format("{0} : {1}", item, item.Value));
                     }
                 }
-
             }
 #endif
-            #endregion
+
+            #endregion Log
+
             return cmd;
         }
-        #endregion
+
+        #endregion Private
     }
 
     public sealed class SimpleSelectFromSQLFile<T> : ISimpleSelectFromSQLFile<T>
          where T : BModel<T>
     {
         #region Contructor
+
         internal SimpleSelectFromSQLFile()
         {
         }
-        #endregion
+
+        #endregion Contructor
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private readonly Queue<object> _container = new Queue<object>();
@@ -588,15 +641,18 @@ namespace simple.sql
         internal string URLFile { set; get; }
 
         #region FromFile
+
         internal ISimpleSelectFromSQLFile<T> Load(string urlFile, BReqDto reqDto)
         {
             this.ParseToParam(this._container, reqDto);
             this.URLFile = urlFile;
             return this;
         }
-        #endregion
+
+        #endregion FromFile
 
         #region Private
+
         /// <summary>
         /// Parses to parameter.
         /// </summary>
@@ -663,10 +719,11 @@ namespace simple.sql
                 {
                     cmd.Parameters.Add(SqlHelper.CreateParameter(param.Item1, param.Item2));
                 }
-
             }
             cmd.CommandText = sql;
+
             #region Log
+
 #if DEBUG
             {
                 Trace.WriteLine(" - [SQL] :\r\n" + sql);
@@ -678,12 +735,16 @@ namespace simple.sql
                 }
             }
 #endif
-            #endregion
+
+            #endregion Log
+
             return cmd;
         }
-        #endregion
+
+        #endregion Private
 
         #region ISimple<T> Members
+
         public IList<IDictionary<string, object>> Get()
         {
             IList<IDictionary<string, object>> resDto = new List<IDictionary<string, object>>();
@@ -738,6 +799,7 @@ namespace simple.sql
                 throw ex;
             }
         }
+
         /// <summary>
         /// Gets the list result.
         /// </summary>
@@ -755,9 +817,10 @@ namespace simple.sql
             }
         }
 
-        #endregion
+        #endregion ISimple<T> Members
 
         #region ISimpleSelectFromSQLFile<T> Members
+
         public int Execute()
         {
             try
@@ -771,7 +834,7 @@ namespace simple.sql
             }
         }
 
-        #endregion
+        #endregion ISimpleSelectFromSQLFile<T> Members
     }
 
     public sealed class SimpleSelectFromStored<T> : ISimpleSelectFromStored<T>
@@ -787,19 +850,23 @@ namespace simple.sql
         internal string StoredName { set; get; }
 
         #region Contructor
+
         internal SimpleSelectFromStored()
         {
         }
-        #endregion
+
+        #endregion Contructor
 
         #region From Stored
+
         internal SimpleSelectFromStored<T> Load(string storedName, BReqDto reqDto)
         {
             this.StoredName = storedName;
             this.ParseToParam(this._container, reqDto);
             return this;
         }
-        #endregion
+
+        #endregion From Stored
 
         #region ISimple<T> Members
 
@@ -835,6 +902,7 @@ namespace simple.sql
                 throw ex;
             }
         }
+
         /// <summary>
         /// Gets the list result.
         /// </summary>
@@ -852,9 +920,10 @@ namespace simple.sql
             }
         }
 
-        #endregion
+        #endregion ISimple<T> Members
 
         #region Private
+
         /// <summary>
         /// Parses to parameter.
         /// </summary>
@@ -903,7 +972,9 @@ namespace simple.sql
             }
             cmd.CommandText = sql;
             cmd.CommandType = System.Data.CommandType.StoredProcedure;
+
             #region Log
+
 #if DEBUG
             {
                 Trace.WriteLine(" - [SQL] :\r\n" + sql);
@@ -915,10 +986,13 @@ namespace simple.sql
                 }
             }
 #endif
-            #endregion
+
+            #endregion Log
+
             return cmd;
-        } 
-        #endregion
+        }
+
+        #endregion Private
 
         #region ISimpleSelectFromStored<T> Members
 
@@ -957,6 +1031,6 @@ namespace simple.sql
             }
         }
 
-        #endregion
+        #endregion ISimpleSelectFromStored<T> Members
     }
 }

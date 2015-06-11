@@ -49,6 +49,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="interface\ISimple.cs" />
     <Compile Include="interface\ISimpleSelect.cs" />
     <Compile Include="interface\ISimpleSelectFromSQLFile.cs" />
     <Compile Include="interface\ISimpleSelectFromStored.cs" />

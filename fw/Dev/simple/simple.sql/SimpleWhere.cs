@@ -2,18 +2,31 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
-using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using simple.helper;
 
 namespace simple.sql
 {
-
+    /// <summary>
+    /// Simple where
+    /// </summary>
     public sealed class SimpleWhere
     {
+        private const string AND_TERM = "AND";
+
+        private const string OR_TERM = "OR";
+
+        private readonly Queue<KeyValuePair<string, KeyValuePair<operators, object>>> _where;
+
+        public SimpleWhere()
+            : base()
+        {
+            this._where = new Queue<KeyValuePair<string, KeyValuePair<operators, object>>>();
+            this.SqlParameters = new List<SqlParameter>();
+        }
+
         public enum operators
         {
             none = 0,
@@ -31,113 +44,15 @@ namespace simple.sql
             Btw = 13,
             Or = 14,
         }
-        private readonly Queue<KeyValuePair<string, KeyValuePair<operators, object>>> _where;
+
         internal IEnumerable<SqlParameter> SqlParameters { private set; get; }
-        private const string AND_TERM = "AND";
-        private const string OR_TERM = "OR";
-        public SimpleWhere()
-            : base()
+
+        public SimpleWhere Btw(string field, object value1, object value2)
         {
-            this._where = new Queue<KeyValuePair<string, KeyValuePair<operators, object>>>();
-            this.SqlParameters = new List<SqlParameter>();
+            this.AddOpr(operators.Btw, field, new object[] { value1, value2 });
+            return this;
         }
 
-        /// <summary>
-        /// Equals
-        /// </summary>
-        /// <param name="field">The field.</param>
-        /// <param name="value">The value.</param>
-        /// <returns></returns>
-        public SimpleWhere Eq(string field, object value)
-        {
-            this.AddOpr(operators.Eq, field, value);
-            return this;
-        }
-        /// <summary>
-        /// Not Equals the specified field.
-        /// </summary>
-        /// <param name="field">The field.</param>
-        /// <param name="value">The value.</param>
-        /// <returns></returns>
-        public SimpleWhere Neq(string field, object value)
-        {
-            this.AddOpr(operators.Neq, field, value);
-            return this;
-        }
-        /// <summary>
-        /// Less then the specified field.
-        /// </summary>
-        /// <param name="field">The field.</param>
-        /// <param name="value">The value.</param>
-        /// <returns></returns>
-        public SimpleWhere Lt(string field, object value)
-        {
-            this.AddOpr(operators.Lt, field, value);
-            return this;
-        }
-        /// <summary>
-        /// Greater the specified field.
-        /// </summary>
-        /// <param name="field">The field.</param>
-        /// <param name="value">The value.</param>
-        /// <returns></returns>
-        public SimpleWhere Gt(string field, object value)
-        {
-            this.AddOpr(operators.Gt, field, value);
-            return this;
-        }
-        /// <summary>
-        /// Less then or Equal the specified field.
-        /// </summary>
-        /// <param name="field">The field.</param>
-        /// <param name="value">The value.</param>
-        /// <returns></returns>
-        public SimpleWhere Le(string field, object value)
-        {
-            this.AddOpr(operators.Le, field, value);
-            return this;
-        }
-        /// <summary>
-        /// Greater or Equal the specified field.
-        /// </summary>
-        /// <param name="field">The field.</param>
-        /// <param name="value">The value.</param>
-        /// <returns></returns>
-        public SimpleWhere Ge(string field, object value)
-        {
-            this.AddOpr(operators.Ge, field, value);
-            return this;
-        }
-        /// <summary>
-        /// Start with the specified field.
-        /// </summary>
-        /// <param name="field">The field.</param>
-        /// <param name="value">The value.</param>
-        /// <returns></returns>
-        public SimpleWhere StartWith(string field, string value)
-        {
-            if (!String.IsNullOrEmpty(value))
-            {
-                value = string.Format("%{0}", value);
-            }
-            this.AddOpr(operators.Stw, field, value);
-            return this;
-        }
-        /// <summary>
-        /// End with the specified field.
-        /// </summary>
-        /// <param name="field">The field.</param>
-        /// <param name="value">The value.</param>
-        /// <returns></returns>
-        public SimpleWhere EndWith(string field, string value)
-        {
-            if (!String.IsNullOrEmpty(value))
-            {
-                value = string.Format("{0}%", value);
-            }
-            this.AddOpr(operators.EnW, field, value);
-            return this;
-        }
         /// <summary>
         /// Contains the specified field.
         /// </summary>
@@ -155,6 +70,58 @@ namespace simple.sql
         }
 
         /// <summary>
+        /// End with the specified field.
+        /// </summary>
+        /// <param name="field">The field.</param>
+        /// <param name="value">The value.</param>
+        /// <returns></returns>
+        public SimpleWhere EndWith(string field, string value)
+        {
+            if (!String.IsNullOrEmpty(value))
+            {
+                value = string.Format("{0}%", value);
+            }
+            this.AddOpr(operators.EnW, field, value);
+            return this;
+        }
+
+        /// <summary>
+        /// Equals
+        /// </summary>
+        /// <param name="field">The field.</param>
+        /// <param name="value">The value.</param>
+        /// <returns></returns>
+        public SimpleWhere Eq(string field, object value)
+        {
+            this.AddOpr(operators.Eq, field, value);
+            return this;
+        }
+
+        /// <summary>
+        /// Greater or Equal the specified field.
+        /// </summary>
+        /// <param name="field">The field.</param>
+        /// <param name="value">The value.</param>
+        /// <returns></returns>
+        public SimpleWhere Ge(string field, object value)
+        {
+            this.AddOpr(operators.Ge, field, value);
+            return this;
+        }
+
+        /// <summary>
+        /// Greater the specified field.
+        /// </summary>
+        /// <param name="field">The field.</param>
+        /// <param name="value">The value.</param>
+        /// <returns></returns>
+        public SimpleWhere Gt(string field, object value)
+        {
+            this.AddOpr(operators.Gt, field, value);
+            return this;
+        }
+
+        /// <summary>
         /// In array the specified field.
         /// </summary>
         /// <param name="field">The field.</param>
@@ -165,6 +132,43 @@ namespace simple.sql
             this.AddOpr(operators.In, field, values);
             return this;
         }
+
+        /// <summary>
+        /// Less then or Equal the specified field.
+        /// </summary>
+        /// <param name="field">The field.</param>
+        /// <param name="value">The value.</param>
+        /// <returns></returns>
+        public SimpleWhere Le(string field, object value)
+        {
+            this.AddOpr(operators.Le, field, value);
+            return this;
+        }
+
+        /// <summary>
+        /// Less then the specified field.
+        /// </summary>
+        /// <param name="field">The field.</param>
+        /// <param name="value">The value.</param>
+        /// <returns></returns>
+        public SimpleWhere Lt(string field, object value)
+        {
+            this.AddOpr(operators.Lt, field, value);
+            return this;
+        }
+
+        /// <summary>
+        /// Not Equals the specified field.
+        /// </summary>
+        /// <param name="field">The field.</param>
+        /// <param name="value">The value.</param>
+        /// <returns></returns>
+        public SimpleWhere Neq(string field, object value)
+        {
+            this.AddOpr(operators.Neq, field, value);
+            return this;
+        }
+
         /// <summary>
         /// Not in array the specified field.
         /// </summary>
@@ -176,11 +180,7 @@ namespace simple.sql
             this.AddOpr(operators.Nin, field, values);
             return this;
         }
-        public SimpleWhere Btw(string field, object value1, object value2)
-        {
-            this.AddOpr(operators.Btw, field, new object[] { value1, value2 });
-            return this;
-        }
+
         /// <summary>
         /// Or the specified where.
         /// </summary>
@@ -195,7 +195,6 @@ namespace simple.sql
                 if (valuePair.Key == operators.Or)
                 {
                     //this.Or((SimpleWhere)valuePair.Value);
-                  
                 }
                 else
                 {
@@ -210,11 +209,35 @@ namespace simple.sql
                         this.SqlParameters = this.SqlParameters.Add(s);
                     }
                 }
-                
             }
             this._where.Enqueue(new KeyValuePair<string, KeyValuePair<operators, object>>(string.Empty,
                     new KeyValuePair<operators, object>(operators.Or, simpleWhere)));
             return this;
+        }
+
+        /// <summary>
+        /// Start with the specified field.
+        /// </summary>
+        /// <param name="field">The field.</param>
+        /// <param name="value">The value.</param>
+        /// <returns></returns>
+        public SimpleWhere StartWith(string field, string value)
+        {
+            if (!String.IsNullOrEmpty(value))
+            {
+                value = string.Format("%{0}", value);
+            }
+            this.AddOpr(operators.Stw, field, value);
+            return this;
+        }
+
+        /// <summary>
+        /// To the SQL.
+        /// </summary>
+        /// <returns></returns>
+        internal string ToSql()
+        {
+            return this.ToSql(AND_TERM);
         }
 
         /// <summary>
@@ -269,6 +292,11 @@ namespace simple.sql
             this._where.Enqueue(new KeyValuePair<string, KeyValuePair<operators, object>>(field.Decamelize(true),
                 new KeyValuePair<operators, object>(opr, param)));
         }
+        /// <summary>
+        /// To the SQL.
+        /// </summary>
+        /// <param name="term">The term.</param>
+        /// <returns></returns>
         private string ToSql(string term)
         {
             StringBuilder sql = new StringBuilder();
@@ -287,32 +315,39 @@ namespace simple.sql
                         where = string.Format("{0} = {1}", item.Key, ((SqlParameter[])item.Value.Value)[0].ParameterName);
                         i++;
                         break;
+
                     case operators.Neq:
                         where = string.Format("{0} <> {1}", item.Key, ((SqlParameter[])item.Value.Value)[0].ParameterName);
                         i++;
                         break;
+
                     case operators.Lt:
                         where = string.Format("{0} < {1}", item.Key, ((SqlParameter[])item.Value.Value)[0].ParameterName);
                         i++;
                         break;
+
                     case operators.Le:
                         where = string.Format("{0} <= {1}", item.Key, ((SqlParameter[])item.Value.Value)[0].ParameterName);
                         i++;
                         break;
+
                     case operators.Gt:
                         where = string.Format("{0} > {1}", item.Key, ((SqlParameter[])item.Value.Value)[0].ParameterName);
                         i++;
                         break;
+
                     case operators.Ge:
                         where = string.Format("{0} >= {1}", item.Key, ((SqlParameter[])item.Value.Value)[0].ParameterName);
                         i++;
                         break;
+
                     case operators.Stw:
                     case operators.EnW:
                     case operators.Ctn:
                         where = string.Format("{0} LIKE {1}", item.Key, ((SqlParameter[])item.Value.Value)[0].ParameterName);
                         i++;
                         break;
+
                     case operators.In:
                     case operators.Nin:
                         var inrange = (SqlParameter[])item.Value.Value;
@@ -341,6 +376,7 @@ namespace simple.sql
                         }
                         where += ")";
                         break;
+
                     case operators.Btw:
                         var from = ((SqlParameter[])item.Value.Value)[0];
                         var to = ((SqlParameter[])item.Value.Value)[1];
@@ -351,6 +387,7 @@ namespace simple.sql
                         where += to.ParameterName;
                         i++;
                         break;
+
                     case operators.Or:
                         var sub = (SimpleWhere)item.Value.Value;
                         if (sub.SqlParameters.Count() == 1)
@@ -363,6 +400,7 @@ namespace simple.sql
                         }
 
                         break;
+
                     default:
                         break;
                 }
@@ -377,11 +415,6 @@ namespace simple.sql
             }
 
             return sql.ToString();
-        }
-
-        internal string ToSql()
-        {
-            return this.ToSql(AND_TERM);
         }
     }
 }

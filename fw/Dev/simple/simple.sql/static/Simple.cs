@@ -1,14 +1,7 @@
-﻿using System.Collections.Generic;
-using System.Data.Common;
-using System.Data.SqlClient;
-using System.Diagnostics;
-using System.Linq;
-using System.Linq.Expressions;
+﻿using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using System.Text;
 using simple.bus.core.model;
 using simple.bus.core.service;
-using simple.helper;
 
 namespace simple.sql
 {
@@ -18,14 +11,15 @@ namespace simple.sql
                                                     , [CallerMemberName]string callerMemberName = "")
             where T : BModel<T>
         {
-
             #region Log
+
 #if DEBUG
             {
                 Trace.Write(" - [CallerMemberName] :" + callerMemberName);
             }
 #endif
-            #endregion
+
+            #endregion Log
 
             return new SimpleSelect<T>()
             {
@@ -38,14 +32,15 @@ namespace simple.sql
                                                     , [CallerMemberName]string callerMemberName = "")
             where T : BModel<T>
         {
-
             #region Log
+
 #if DEBUG
             {
                 Trace.Write(" - [CallerMemberName] :" + callerMemberName);
             }
 #endif
-            #endregion
+
+            #endregion Log
 
             return new SimpleSelect<T>()
             {
@@ -69,12 +64,15 @@ namespace simple.sql
             where T : BModel<T>
         {
             #region Log
+
 #if DEBUG
             {
                 Trace.Write(" - [CallerMemberName] :" + callerMemberName);
             }
 #endif
-            #endregion
+
+            #endregion Log
+
             return new SimpleSelectFromSQLFile<T>()
             {
                 Service = service,
@@ -97,12 +95,15 @@ namespace simple.sql
             where T : BModel<T>
         {
             #region Log
+
 #if DEBUG
             {
                 Trace.Write(" - [CallerMemberName] :" + callerMemberName);
             }
 #endif
-            #endregion
+
+            #endregion Log
+
             return new SimpleSelectFromStored<T>()
             {
                 Service = service,

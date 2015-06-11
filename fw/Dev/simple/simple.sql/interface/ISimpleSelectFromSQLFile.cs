@@ -1,15 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data.Common;
-using System.Data.SqlClient;
-using System.Diagnostics;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Runtime.CompilerServices;
-using System.Text;
+﻿using System.Collections.Generic;
 using simple.bus.core.model;
-using simple.bus.core.service;
-using simple.helper;
 
 namespace simple.sql
 {
@@ -17,6 +7,7 @@ namespace simple.sql
        where T : BModel<T>
     {
         IList<IDictionary<string, object>> Get();
+
         int Execute();
     }
 }
