@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Dynamic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 
@@ -142,7 +140,7 @@ namespace simple.helper
                     }
                     ret = buf.Append(s.Substring(pos).ToUpperInvariant()).ToString();
                 }
-                
+
                 if (!toLower)
                     return ret;
                 return ret.ToLowerInvariant();
@@ -218,34 +216,6 @@ namespace simple.helper
             return default(T);
         }
 
-        ///// <summary>
-        ///// Gets the member names of properties. Not all IDynamicMetaObjectProvider have support for this.
-        ///// </summary>
-        ///// <param name="target">The target.</param>
-        ///// <param name="dynamicOnly">if set to <c>true</c> [dynamic only]. Won't add reflected properties</param>
-        ///// <returns></returns>
-        //public static IEnumerable<string> GetMemberNames(this object target, bool dynamicOnly = false)
-        //{
-        //    var tList = new List<string>();
-        //    if (!dynamicOnly)
-        //    {
-        //        tList.AddRange(target.GetType().GetProperties()
-        //                                       .Where(p => p.CanRead && p.CanWrite
-        //                                           && !p.CustomAttributes.Any(s=> s.GetType().Equals(typeof(AcceptRejectRule)))
-
-        //                                      )
-        //                                       .Select(it => it.Name.Decamelize(true)));
-        //    }
-        //    var tTarget = target as IDynamicMetaObjectProvider;
-        //    if (tTarget != null)
-        //    {
-        //        tList.AddRange(tTarget.GetMetaObject(Expression.Constant(tTarget))
-        //                              .GetDynamicMemberNames()
-        //                              .Select(it => it.Decamelize().ToLower()));
-        //    }
-        //    return tList;
-        //}
-
         /// <summary>
         /// Sets the name of the member.
         /// </summary>
@@ -256,10 +226,18 @@ namespace simple.helper
         {
             target.GetType().GetProperty(memberName.Camelize()).SetValue(target, value, null);
         }
+
+        /// <summary>
+        /// Gets the member value.
+        /// </summary>
+        /// <param name="target">The target.</param>
+        /// <param name="memberName">Name of the member.</param>
+        /// <returns></returns>
         public static object GetMemberValue(this object target, string memberName)
         {
             return target.GetType().GetProperty(memberName.Camelize()).GetValue(target);
         }
+
         /// <summary>
         /// Gets the type of the database.
         /// </summary>
@@ -281,6 +259,41 @@ namespace simple.helper
                 p1.DbType = (DbType)tc.ConvertFrom(theType.Name);
             }
             return p1.SqlDbType;
+        }
+
+        /// <summary>
+        /// Adds the specified t.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="colection">The colection.</param>
+        /// <param name="t">The t.</param>
+        /// <returns></returns>
+        public static IEnumerable<T> Add<T>(this IEnumerable<T> colection, T t)
+        {
+            foreach (var item in colection)
+            {
+                yield return item;
+            }
+            yield return t;
+        }
+
+        /// <summary>
+        /// Adds the range.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="colection">The colection.</param>
+        /// <param name="addItems">The add items.</param>
+        /// <returns></returns>
+        public static IEnumerable<T> AddRange<T>(this IEnumerable<T> colection, IEnumerable<T> addItems)
+        {
+            foreach (var item in colection)
+            {
+                yield return item;
+            }
+            foreach (var item in addItems)
+            {
+                yield return item;
+            }
         }
     }
 }
