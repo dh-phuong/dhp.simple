@@ -11,6 +11,8 @@ namespace simple.bus.core.context
     /// </summary>
     public interface IBContext
     {
+        string AppId { get; set; }
+
         void BeginTransaction();
 
         void BeginTransaction(IsolationLevel isolationLevel);
@@ -45,9 +47,10 @@ namespace simple.bus.core.context
         /// <summary>
         /// コンストラクタ
         /// </summary>
-        public DBContext()
+        public DBContext(String connectionString)
         {
-            this._connectionString = @"Data Source=192.168.1.36\SQLEXPRESS;Initial Catalog=DBTEST;User ID=sa;Password=123456;Connection Timeout=90";
+            this._connectionString = @"Data Source=192.168.1.25;Initial Catalog=BUS;User ID=sa;Password=0978780906;Connection Timeout=90";
+            //this._connectionString = @"Data Source=192.168.1.36\SQLEXPRESS;Initial Catalog=DBTEST;User ID=sa;Password=123456;Connection Timeout=90";
             this.Connect();
         }
 
@@ -257,5 +260,21 @@ namespace simple.bus.core.context
         }
 
         #endregion IBContext Members
+
+        #region IBContext Members
+
+        /// <summary>
+        /// Gets or sets the application identifier.
+        /// </summary>
+        /// <value>
+        /// The application identifier.
+        /// </value>
+        public string AppId
+        {
+            set;
+            get;
+        }
+
+        #endregion
     }
 }

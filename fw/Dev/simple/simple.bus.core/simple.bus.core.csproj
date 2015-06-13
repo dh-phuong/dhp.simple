@@ -74,7 +74,9 @@
     <Compile Include="model\BModel.cs" />
     <Compile Include="model\BReqDto.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="service\BService.cs" />
+    <Compile Include="service\BService.cs">
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\simple.helper\simple.helper.csproj">

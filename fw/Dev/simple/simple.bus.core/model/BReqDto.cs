@@ -1,6 +1,9 @@
 ﻿namespace simple.bus.core.model
 {
-    public class BReqDto : BModel<BReqDto>
+    /// <summary>
+    /// Request Data Object
+    /// </summary>
+    public abstract class BReqDto : BModel<BReqDto>
     {
     }
 }

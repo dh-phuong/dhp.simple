@@ -15,7 +15,7 @@ namespace simple.bus.core.service
 
         public BService(IBContext ctx)
         {
-            this.Context = new DBContext();
+            this.Context = ctx;
         }
 
         public DateTime NowDate
@@ -26,32 +26,21 @@ namespace simple.bus.core.service
             }
         }
 
+        /// <summary>
+        /// Sets the update information.
+        /// </summary>
+        /// <typeparam name="E"></typeparam>
+        /// <param name="entity">The entity.</param>
         public void SetUpdateInfo<E>(E entity)
             where E : BEntity<E>
         {
             var nowDate = this.NowDate;
-            entity.CreateDate = nowDate;
-            entity.UpdateDate = nowDate;
-            entity.DeleteFlag = false;
-            entity.UpdateUId = 10;
-            entity.CreateUId = 10;
+            entity.CrtTime = nowDate;
+            entity.UpdTime = nowDate;
+            entity.UpdUId = 10;
+            entity.CrtUId = 10;
         }
 
-        public void SetContext(IBContext ctx)
-        {
-            this.Context = ctx;
-        }
-
-        /// <summary>
-        /// Deletes the specified entity.
-        /// </summary>
-        /// <param name="Entity">The entity.</param>
-        /// <returns></returns>
-        public int Delete(T Entity)
-        {
-            var entity = Entity as BEntity<T>;
-            //var sel = new SimpleSelect();
-            return 0;
-        }
+        public abstract string NextCSeq();
     }
 }

@@ -4,9 +4,13 @@ using simple.bus.core.attribute;
 
 namespace simple.bus.core.model
 {
-    public class BEntity<T> : BModel<T>
+    public abstract class BEntity<T> : BModel<T>
         where T : class
     {
+        #region CONST
+        public const int C_SEQ_LENGTH = 10;
+        #endregion
+
         #region Constructor
 
         /// <summary>
@@ -37,30 +41,43 @@ namespace simple.bus.core.model
         /// </value>
         [AutoColumn()]
         public decimal Id { get; internal set; }
-
+        /// <summary>
+        /// Gets or sets the application identifier.
+        /// </summary>
+        /// <value>
+        /// The application identifier.
+        /// </value>
+        public string AppId { get; set; }
+        /// <summary>
+        /// Gets or sets the c seq.
+        /// </summary>
+        /// <value>
+        /// The c seq.
+        /// </value>
+        public string CSeq { get; set; }
         /// <summary>
         /// Gets or sets a value indicating whether [delete flag].
         /// </summary>
         /// <value>
         ///   <c>true</c> if [delete flag]; otherwise, <c>false</c>.
         /// </value>
-        public bool DeleteFlag { get; set; }
+        public bool DelFlg { get; set; }
 
         /// <summary>
         /// Gets or sets the create u cd.
         /// </summary>
         /// <value>
-        /// The create user cd.
+        /// The create user id.
         /// </value>
-        public int CreateUId { get; set; }
+        public int CrtUId { get; set; }
 
         /// <summary>
         /// Gets or sets the update u cd.
         /// </summary>
         /// <value>
-        /// The update user cd.
+        /// The update user id .
         /// </value>
-        public int UpdateUId { get; set; }
+        public int UpdUId { get; set; }
 
         /// <summary>
         /// Gets or sets the create date.
@@ -68,7 +85,7 @@ namespace simple.bus.core.model
         /// <value>
         /// The create date.
         /// </value>
-        public DateTime CreateDate { get; set; }
+        public DateTime CrtTime { get; set; }
 
         /// <summary>
         /// Gets or sets the update date.
@@ -76,7 +93,7 @@ namespace simple.bus.core.model
         /// <value>
         /// The update date.
         /// </value>
-        public DateTime UpdateDate { get; set; }
+        public DateTime UpdTime { get; set; }
 
         /// <summary>
         /// Gets or sets the version number.
@@ -85,8 +102,13 @@ namespace simple.bus.core.model
         /// The version number.
         /// </value>
         [AutoColumn]
-        public int VersionNo { get; internal set; }
+        public int VerNo { get; internal set; }
 
         #endregion Base
+
+        #region abstract
+
+        public abstract string FixCd(string text, char paddingChar = '0'); 
+        #endregion
     }
 }
