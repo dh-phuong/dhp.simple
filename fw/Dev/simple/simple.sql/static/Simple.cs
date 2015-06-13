@@ -15,7 +15,8 @@ namespace simple.sql
 
 #if DEBUG
             {
-                Trace.Write(" - [CallerMemberName] :" + callerMemberName);
+                Trace.Write("#[CallerMemberName] :" + callerMemberName);
+                Trace.WriteLine("#".PadLeft(100, '#') + ": start");
             }
 #endif
 
@@ -36,7 +37,8 @@ namespace simple.sql
 
 #if DEBUG
             {
-                Trace.Write(" - [CallerMemberName] :" + callerMemberName);
+                Trace.Write("#[CallerMemberName] :" + callerMemberName);
+                Trace.WriteLine("#".PadLeft(100, '#') + ": start");
             }
 #endif
 
@@ -67,7 +69,8 @@ namespace simple.sql
 
 #if DEBUG
             {
-                Trace.Write(" - [CallerMemberName] :" + callerMemberName);
+                Trace.Write("#[CallerMemberName] :" + callerMemberName);
+                Trace.WriteLine("#".PadLeft(100, '#') + ": start");
             }
 #endif
 
@@ -98,7 +101,8 @@ namespace simple.sql
 
 #if DEBUG
             {
-                Trace.Write(" - [CallerMemberName] :" + callerMemberName);
+                Trace.Write("#[CallerMemberName] :" + callerMemberName);
+                Trace.WriteLine("#".PadLeft(100, '#') + ": start");
             }
 #endif
 

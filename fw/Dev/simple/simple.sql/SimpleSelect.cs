@@ -109,6 +109,11 @@ namespace simple.sql
                     resDto.Add(item);
                 }
             }
+            #region Trace Log
+		#if DEBUG
+            SqlHelper.TraceLogCmd(cmd);
+            #endif 
+	#endregion
             return resDto;
         }
 
@@ -214,6 +219,11 @@ namespace simple.sql
             this._container.Enqueue("COUNT(*)");
             var cmd = this.SelectCommand();
             var count = this.Service.Context.ExecuteScalar(cmd);
+            #region Trace Log
+#if DEBUG
+            SqlHelper.TraceLogCmd(cmd);
+#endif
+            #endregion
             return (Int32)count;
         }
 
@@ -245,10 +255,14 @@ namespace simple.sql
             {
                 Tuple<string, object> param = (Tuple<string, object>)this._container.Dequeue();
                 cmd.Parameters.Add(SqlHelper.CreateParameter(param.Item1, param.Item2));
-                Trace.WriteLine(param);
             }
             var id = this.Service.Context.ExecuteScalar(cmd);
-            return (decimal)id;
+            #region Trace Log
+#if DEBUG
+            SqlHelper.TraceLogCmd(cmd);
+#endif
+            #endregion
+            return (int)id;
         }
 
         /// <summary>
@@ -275,7 +289,6 @@ namespace simple.sql
             {
                 Tuple<string, object> param = (Tuple<string, object>)this._container.Dequeue();
                 SqlParameters.Add(SqlHelper.CreateParameter(param.Item1, param.Item2));
-                Trace.WriteLine(param);
             }
             if (this.Where != null)
             {
@@ -303,11 +316,14 @@ namespace simple.sql
                     }
                 }
             }
-            Trace.WriteLine("- [Querry] :");
-            Trace.WriteLine(sql);
             cmd.CommandText = sql;
             cmd.Parameters.AddRange(SqlParameters.ToArray());
             var result = this.Service.Context.ExecuteNonQuerySql(cmd);
+            #region Trace Log
+#if DEBUG
+            SqlHelper.TraceLogCmd(cmd);
+#endif
+            #endregion
             return result;
         }
 
@@ -326,19 +342,12 @@ namespace simple.sql
                 cmd.Parameters.AddRange(this.Where.SqlParameters.ToArray());
             }
             cmd.CommandText = sql;
-
-            #region Log
-
-#if DEBUG
-            {
-                Trace.WriteLine(" - [SQL]:");
-                Trace.WriteLine(sql);
-            }
-#endif
-
-            #endregion Log
-
             var result = this.Service.Context.ExecuteNonQuerySql(cmd);
+            #region Trace Log
+#if DEBUG
+            SqlHelper.TraceLogCmd(cmd);
+#endif
+            #endregion
             return result;
         }
 
@@ -388,6 +397,11 @@ namespace simple.sql
             try
             {
                 var cmd = this.SelectCommand();
+                #region Trace Log
+#if DEBUG
+                SqlHelper.TraceLogCmd(cmd);
+#endif
+                #endregion
                 return this.Service.Context.GetData<T>(cmd);
             }
             catch (Exception ex)
@@ -451,11 +465,8 @@ namespace simple.sql
         private string GetSimpleDeleteQuerry()
         {
             StringBuilder sql = new StringBuilder();
-            sql.Append("UPDATE ");
-            sql.AppendLine(StringHelper.Me.ToTableName<T>() + " ");
-            sql.AppendLine("SET ");
-            sql.Append("\t  ");
-            sql.AppendLine("delete_flag = 1 ");
+            sql.Append("DELETE FROM ");
+            sql.AppendLine(StringHelper.Me.ToTableName<T>() + " ");            
             return sql.ToString();
         }
 
@@ -470,9 +481,11 @@ namespace simple.sql
             var tableName = StringHelper.Me.ToTableName<T>();
             var columns = t.GetColumNames().ToArray();
             string cols = string.Join(", ", columns);
+            sql.AppendFormat("SET NOCOUNT ON; ");
+            sql.AppendFormat("DECLARE @out_id as ins_ids ");
             sql.AppendFormat("INSERT INTO {0}(", tableName);
             sql.AppendLine(cols + ") ");
-            sql.AppendLine("OUTPUT INSERTED.id ");
+            sql.AppendLine("OUTPUT INSERTED.id into @out_id ");
             sql.Append("VALUES(");
             for (int i = 0; i < columns.Length; i++)
             {
@@ -480,6 +493,7 @@ namespace simple.sql
             }
             string param = string.Join(", ", columns);
             sql.AppendLine(param + ") ");
+            sql.AppendLine("SELECT * from @out_id ");
             return sql.ToString();
         }
 
@@ -595,25 +609,6 @@ namespace simple.sql
             #endregion OrderBy
 
             cmd.CommandText = sql;
-
-            #region Log
-
-#if DEBUG
-            {
-                Trace.WriteLine(" - [SQL] :\r\n" + sql);
-                if (this.Where != null)
-                {
-                    Trace.WriteLine(" - [SqlParameters] :");
-                    foreach (var item in this.Where.SqlParameters)
-                    {
-                        Trace.WriteLine(string.Format("{0} : {1}", item, item.Value));
-                    }
-                }
-            }
-#endif
-
-            #endregion Log
-
             return cmd;
         }
 
@@ -721,23 +716,6 @@ namespace simple.sql
                 }
             }
             cmd.CommandText = sql;
-
-            #region Log
-
-#if DEBUG
-            {
-                Trace.WriteLine(" - [SQL] :\r\n" + sql);
-                Trace.WriteLine("\r\n");
-                Trace.WriteLine(" - [Parameters] :\r\n");
-                foreach (SqlParameter parameter in cmd.Parameters)
-                {
-                    Trace.WriteLine(string.Format("{0} : {1}", parameter.ParameterName, parameter.Value));
-                }
-            }
-#endif
-
-            #endregion Log
-
             return cmd;
         }
 
@@ -764,6 +742,11 @@ namespace simple.sql
                     resDto.Add(item);
                 }
             }
+            #region Trace Log
+#if DEBUG
+            SqlHelper.TraceLogCmd(cmd);
+#endif
+            #endregion
             return resDto;
         }
 
@@ -809,6 +792,11 @@ namespace simple.sql
             try
             {
                 var cmd = this.SqlCommand();
+                #region Trace Log
+#if DEBUG
+                SqlHelper.TraceLogCmd(cmd);
+#endif
+                #endregion
                 return this.Service.Context.GetData<T>(cmd);
             }
             catch (Exception ex)
@@ -826,6 +814,11 @@ namespace simple.sql
             try
             {
                 var cmd = this.SqlCommand();
+                #region Trace Log
+#if DEBUG
+                SqlHelper.TraceLogCmd(cmd);
+#endif
+                #endregion
                 return this.Service.Context.ExecuteNonQuerySql(cmd);
             }
             catch (Exception ex)
@@ -912,6 +905,11 @@ namespace simple.sql
             try
             {
                 var cmd = this.SqlCommand();
+                #region Trace Log
+#if DEBUG
+                SqlHelper.TraceLogCmd(cmd);
+#endif
+                #endregion
                 return this.Service.Context.GetData<T>(cmd);
             }
             catch (Exception ex)
@@ -972,23 +970,6 @@ namespace simple.sql
             }
             cmd.CommandText = sql;
             cmd.CommandType = System.Data.CommandType.StoredProcedure;
-
-            #region Log
-
-#if DEBUG
-            {
-                Trace.WriteLine(" - [SQL] :\r\n" + sql);
-                Trace.WriteLine("\r\n");
-                Trace.WriteLine(" - [Parameters] :\r\n");
-                foreach (SqlParameter parameter in cmd.Parameters)
-                {
-                    Trace.WriteLine(string.Format("{0} : {1}", parameter.ParameterName, parameter.Value));
-                }
-            }
-#endif
-
-            #endregion Log
-
             return cmd;
         }
 
@@ -1015,6 +996,11 @@ namespace simple.sql
                     resDto.Add(item);
                 }
             }
+            #region Trace Log
+#if DEBUG
+            SqlHelper.TraceLogCmd(cmd);
+#endif
+            #endregion
             return resDto;
         }
 
@@ -1023,6 +1009,11 @@ namespace simple.sql
             try
             {
                 var cmd = this.SqlCommand();
+                #region Trace Log
+#if DEBUG
+                SqlHelper.TraceLogCmd(cmd);
+#endif
+                #endregion
                 return this.Service.Context.ExecuteNonQuerySql(cmd);
             }
             catch (Exception ex)

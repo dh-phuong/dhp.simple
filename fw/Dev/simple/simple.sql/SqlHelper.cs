@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-
 using System.Data.SqlClient;
+using System.Diagnostics;
 using simple.helper;
 
 namespace simple.sql
@@ -1048,5 +1048,19 @@ namespace simple.sql
         #endregion "パラメータ キャッシュ関連メソッド"
 
         #endregion "静的メソッド"
+
+#if DEBUG
+        internal static void TraceLogCmd(SqlCommand cmd)
+        {
+            Trace.WriteLine("#[CommandText]: ");
+            Trace.WriteLine(cmd.CommandText);
+            Trace.WriteLine("#[Parameters]: ");
+            for (int i = 0; i < cmd.Parameters.Count; i++)
+            {
+                var sqlParam = cmd.Parameters[i];
+                Trace.WriteLine(string.Format("# {0}: {1} ", sqlParam.ParameterName, sqlParam.Value));
+            }
+        } 
+#endif
     }
 }
