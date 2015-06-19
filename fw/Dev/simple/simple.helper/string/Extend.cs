@@ -194,21 +194,31 @@ namespace simple.helper
         /// </summary>
         /// <param name="className">Name of the class.</param>
         /// <returns></returns>
-        public static T ToEntityClass<T>(this string className)
+        public static T InstanceOf<T>(this string className)
         {
-            var entityName = className.Camelize();
             string assemblyFolder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             var paths = from path in Directory.GetFiles(assemblyFolder, "*.dll", SearchOption.AllDirectories)
                         select path;
             foreach (var path in paths)
             {
                 Assembly assembly = Assembly.LoadFrom(path);
-                Type findClass = (Type)(from type in assembly.GetTypes()
-                                        where type.IsClass == true
-                                           && type.Name.Equals(entityName)
-                                        select type);
-                if (findClass != null)
+
+                //var names = (from cls in assembly.GetTypes()
+                //             where
+                //                   cls.IsClass == true
+                //             select cls);
+                //names.AsParallel().ForAll(s =>
+                //    System.Diagnostics.Debug.WriteLine(s.Name));
+
+                
+                var result = (from cls in assembly.GetTypes()
+                              where
+                                    cls.IsClass == true
+                                 && cls.Name.Equals(className)
+                              select cls).SingleOrDefault();
+                if (result != null)
                 {
+                    Type findClass = (Type)result;
                     return (T)Activator.CreateInstance(findClass);
                 }
             }
