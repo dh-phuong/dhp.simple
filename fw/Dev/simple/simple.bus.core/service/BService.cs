@@ -1,8 +1,8 @@
 ﻿using System;
-using simple.bus.core.context;
-using simple.bus.core.model;
+using simple.core.context;
+using simple.core.model;
 
-namespace simple.bus.core.service
+namespace simple.core.service
 {
     /// <summary>
     /// Base Service

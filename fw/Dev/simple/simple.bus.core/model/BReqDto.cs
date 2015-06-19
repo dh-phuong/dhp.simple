@@ -1,4 +1,4 @@
-﻿namespace simple.bus.core.model
+﻿namespace simple.core.model
 {
     /// <summary>
     /// Request Data Object

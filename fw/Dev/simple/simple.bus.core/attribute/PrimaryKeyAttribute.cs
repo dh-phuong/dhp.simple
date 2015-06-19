@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace simple.bus.core.attribute
+namespace simple.core.attribute
 {
     /// <summary>
     /// PrimaryKey Column

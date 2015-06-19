@@ -7,8 +7,8 @@
     <ProjectGuid>{903C0C96-7F1B-47EE-A2D4-AD27ECFE6674}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>simple.bus.core</RootNamespace>
-    <AssemblyName>simple.bus.core</AssemblyName>
+    <RootNamespace>simple.core</RootNamespace>
+    <AssemblyName>simple.core</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />

@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Data.Common;
-using simple.bus.core.attribute;
+using simple.core.attribute;
 
-namespace simple.bus.core.model
+namespace simple.core.model
 {
     public abstract class BEntity<T> : BModel<T>
         where T : class

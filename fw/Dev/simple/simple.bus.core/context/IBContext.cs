@@ -4,7 +4,7 @@ using System.Data;
 using System.Data.Common;
 using System.Data.SqlClient;
 
-namespace simple.bus.core.context
+namespace simple.core.context
 {
     /// <summary>
     /// Business context
@@ -49,7 +49,7 @@ namespace simple.bus.core.context
         /// </summary>
         public DBContext(String connectionString)
         {
-            this._connectionString = @"Data Source=192.168.1.25;Initial Catalog=BUS;User ID=sa;Password=0978780906;Connection Timeout=90";
+            this._connectionString = @"Data Source=192.168.1.36\SQLEXPRESS;Initial Catalog=BUS;User ID=sa;Password=123456;Connection Timeout=90";
             //this._connectionString = @"Data Source=192.168.1.36\SQLEXPRESS;Initial Catalog=DBTEST;User ID=sa;Password=123456;Connection Timeout=90";
             this.Connect();
         }

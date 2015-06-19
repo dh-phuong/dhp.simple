@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Linq;
-using simple.bus.core.attribute;
+using simple.core.attribute;
 using simple.helper;
 
-namespace simple.bus.core.model
+namespace simple.core.model
 {
     /// <summary>
     /// 
