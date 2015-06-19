@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System.Data.Common;
 using System.Linq;
 using simple.core.attribute;
-using simple.helper;
+using hpsofts.Extension;
+using hpsofts.StringHelper;
 
 namespace simple.core.model
 {

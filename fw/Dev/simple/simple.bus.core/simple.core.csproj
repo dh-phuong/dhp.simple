@@ -73,16 +73,11 @@
     <Compile Include="model\BEntity.cs" />
     <Compile Include="model\BModel.cs" />
     <Compile Include="model\BReqDto.cs" />
+    <Compile Include="model\RespondDto.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="service\BService.cs">
       <SubType>Code</SubType>
     </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\simple.helper\simple.helper.csproj">
-      <Project>{ce7dc6dd-87a3-4536-9a71-d0b943a6ad27}</Project>
-      <Name>simple.helper</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\sha.pfx">
@@ -90,7 +85,12 @@
     </None>
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\hpsofts\hpsofts.csproj">
+      <Project>{23703ba5-1be8-4c4f-bb49-ffbfad4aca57}</Project>
+      <Name>hpsofts</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
