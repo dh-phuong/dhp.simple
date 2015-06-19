@@ -66,13 +66,13 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\simple.bus.core\simple.bus.core.csproj">
-      <Project>{903c0c96-7f1b-47ee-a2d4-ad27ecfe6674}</Project>
-      <Name>simple.bus.core</Name>
+    <ProjectReference Include="..\hpsofts\hpsofts.csproj">
+      <Project>{23703ba5-1be8-4c4f-bb49-ffbfad4aca57}</Project>
+      <Name>hpsofts</Name>
     </ProjectReference>
-    <ProjectReference Include="..\simple.helper\simple.helper.csproj">
-      <Project>{ce7dc6dd-87a3-4536-9a71-d0b943a6ad27}</Project>
-      <Name>simple.helper</Name>
+    <ProjectReference Include="..\simple.bus.core\simple.core.csproj">
+      <Project>{903c0c96-7f1b-47ee-a2d4-ad27ecfe6674}</Project>
+      <Name>simple.core</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

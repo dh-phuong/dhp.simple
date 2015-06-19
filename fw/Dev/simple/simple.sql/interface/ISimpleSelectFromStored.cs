@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using simple.bus.core.model;
+using simple.core.model;
 
 namespace simple.sql
 {

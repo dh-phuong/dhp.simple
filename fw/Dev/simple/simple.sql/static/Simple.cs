@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using simple.bus.core.model;
-using simple.bus.core.service;
+using simple.core.model;
+using simple.core.service;
 
 namespace simple.sql
 {

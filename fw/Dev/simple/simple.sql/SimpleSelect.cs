@@ -5,9 +5,10 @@ using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
-using simple.bus.core.model;
-using simple.bus.core.service;
-using simple.helper;
+using simple.core.model;
+using simple.core.service;
+using hpsofts.StringHelper;
+using hpsofts.Extension;
 
 namespace simple.sql
 {
@@ -422,7 +423,7 @@ namespace simple.sql
         {
             T t = Activator.CreateInstance<T>();
             StringBuilder sql = new StringBuilder();
-            var tableName = StringHelper.Me.ToTableName<T>();
+            var tableName = StringHelper.Me.ToSqlTable<T>();
             IList<string> columns = new List<string>();
             if (this._groupColumns.Count > 0)
             {
@@ -466,7 +467,7 @@ namespace simple.sql
         {
             StringBuilder sql = new StringBuilder();
             sql.Append("DELETE FROM ");
-            sql.AppendLine(StringHelper.Me.ToTableName<T>() + " ");            
+            sql.AppendLine(StringHelper.Me.ToSqlTable<T>() + " ");
             return sql.ToString();
         }
 
@@ -478,7 +479,7 @@ namespace simple.sql
         {
             T t = Activator.CreateInstance<T>();
             StringBuilder sql = new StringBuilder();
-            var tableName = StringHelper.Me.ToTableName<T>();
+            var tableName = StringHelper.Me.ToSqlTable<T>();
             var columns = t.GetColumNames().ToArray();
             string cols = string.Join(", ", columns);
             sql.AppendFormat("SET NOCOUNT ON; ");
@@ -504,7 +505,7 @@ namespace simple.sql
         private string GetSimpleUpdateQuerry()
         {
             StringBuilder sql = new StringBuilder();
-            var tableName = StringHelper.Me.ToTableName<T>();
+            var tableName = StringHelper.Me.ToSqlTable<T>();
             sql.AppendLine("UPDATE " + tableName + " ");
             sql.AppendLine("SET ");
             sql.Append("\t  ");

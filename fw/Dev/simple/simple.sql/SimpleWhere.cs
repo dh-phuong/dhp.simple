@@ -5,7 +5,7 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using simple.helper;
+using hpsofts.Extension;
 
 namespace simple.sql
 {
