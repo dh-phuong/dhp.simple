@@ -1,6 +1,6 @@
 ﻿using System.Data.Common;
-using simple.bus.core.attribute;
-using simple.bus.core.model;
+using simple.core.attribute;
+using simple.core.model;
 
 namespace testfw.model
 {

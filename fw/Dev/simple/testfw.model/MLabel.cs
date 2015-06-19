@@ -1,5 +1,5 @@
 ﻿using System.Data.Common;
-using simple.bus.core.model;
+using simple.core.model;
 
 namespace testfw.model
 {

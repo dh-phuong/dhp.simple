@@ -65,9 +65,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\simple.bus.core\simple.bus.core.csproj">
+    <ProjectReference Include="..\simple.bus.core\simple.core.csproj">
       <Project>{903c0c96-7f1b-47ee-a2d4-ad27ecfe6674}</Project>
-      <Name>simple.bus.core</Name>
+      <Name>simple.core</Name>
     </ProjectReference>
     <ProjectReference Include="..\simple.helper\simple.helper.csproj">
       <Project>{ce7dc6dd-87a3-4536-9a71-d0b943a6ad27}</Project>

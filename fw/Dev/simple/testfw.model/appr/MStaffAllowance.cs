@@ -4,8 +4,8 @@ using System.Data.Common;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using simple.bus.core.attribute;
-using simple.bus.core.model;
+using simple.core.attribute;
+using simple.core.model;
 
 namespace testfw.model.appr
 {
