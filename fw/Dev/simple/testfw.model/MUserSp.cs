@@ -40,6 +40,11 @@ namespace testfw.model
         public string GroupCd { get; set; }
 
         public string CustomerCd { get; set; }
+
+        public override string FixCd(string text, char paddingChar = '0')
+        {
+            throw new NotImplementedException();
+        }
     }
 
 }

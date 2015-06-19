@@ -45,6 +45,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="appr\MStaffSalary.cs" />
+    <Compile Include="appr\MStaffDependent.cs" />
+    <Compile Include="appr\MStaffContract.cs" />
+    <Compile Include="appr\MStaffAllowance.cs" />
+    <Compile Include="appr\MStaff.cs" />
+    <Compile Include="bus\MSysConfig.cs" />
+    <Compile Include="bus\MSysAuthority.cs" />
+    <Compile Include="bus\MSysFunction.cs" />
+    <Compile Include="bus\MSysGroup.cs" />
+    <Compile Include="bus\MSysMessage.cs" />
+    <Compile Include="bus\MSysUser.cs" />
     <Compile Include="MGroupD.cs" />
     <Compile Include="MGroupH.cs" />
     <Compile Include="MLabel.cs" />
@@ -68,6 +79,7 @@
       <Link>Properties\sha.pfx</Link>
     </None>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

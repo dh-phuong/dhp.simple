@@ -19,5 +19,10 @@ namespace testfw.model
             : base(dr)
         {
         }
+
+        public override string FixCd(string text, char paddingChar = '0')
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

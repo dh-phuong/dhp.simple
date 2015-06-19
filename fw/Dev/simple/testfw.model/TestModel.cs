@@ -10,5 +10,9 @@ namespace testfw.model
     public class TestModel : BEntity<TestModel>
     {
 
+        public override string FixCd(string text, char paddingChar = '0')
+        {
+            throw new NotImplementedException();
+        }
     }
 }
