@@ -2,14 +2,14 @@
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Linq;
-using simple.core.attribute;
 using hpsofts.Extension;
 using hpsofts.StringHelper;
+using simple.core.attribute;
 
 namespace simple.core.model
 {
     /// <summary>
-    /// 
+    ///
     /// </summary>
     /// <typeparam name="T"></typeparam>
     [Serializable]
@@ -47,9 +47,7 @@ namespace simple.core.model
                         {
                             propInfo.SetValue(this, Convert.ChangeType(dr[name], propInfo.PropertyType), null);
                         }
-                        
                     }
-                        
                 }
             }
         }
