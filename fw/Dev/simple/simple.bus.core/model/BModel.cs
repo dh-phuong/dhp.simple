@@ -38,7 +38,18 @@ namespace simple.core.model
                 {
                     var name = propInfo.Name.Decamelize().ToLower();
                     if (dr[name] != DBNull.Value)
-                        propInfo.SetValue(this, Convert.ChangeType(dr[name], propInfo.PropertyType), null);
+                    {
+                        if (propInfo.PropertyType.Name.Equals(typeof(Nullable<>).Name))
+                        {
+                            propInfo.SetValue(this, dr[name], null);
+                        }
+                        else
+                        {
+                            propInfo.SetValue(this, Convert.ChangeType(dr[name], propInfo.PropertyType), null);
+                        }
+                        
+                    }
+                        
                 }
             }
         }
