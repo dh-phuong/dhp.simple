@@ -302,6 +302,15 @@ namespace simple.sql
                 // Update by default primary key
                 T t = Activator.CreateInstance<T>();
                 var PK = t.GetPK();
+                if (PK.Keys.Count == 0)
+                {
+                    throw new MissingFieldException(typeof(T).Name, "Primary Key");
+                    #region Trace Log
+#if DEBUG
+                    SqlHelper.TraceLogCmd(cmd);
+#endif
+                    #endregion
+                }
                 sql += "WHERE \r\n";
                 for (int i = 0; i < PK.Keys.Count; i++)
                 {
@@ -483,7 +492,7 @@ namespace simple.sql
             var columns = t.GetColumNames().ToArray();
             string cols = string.Join(", ", columns);
             sql.AppendFormat("SET NOCOUNT ON; ");
-            sql.AppendFormat("DECLARE @out_id as ins_ids ");
+            sql.AppendFormat("DECLARE @out_id as ins_ids; ");
             sql.AppendFormat("INSERT INTO {0}(", tableName);
             sql.AppendLine(cols + ") ");
             sql.AppendLine("OUTPUT INSERTED.id into @out_id ");
@@ -493,7 +502,7 @@ namespace simple.sql
                 columns[i] = SqlHelper.BuildParameterName(columns[i]);
             }
             string param = string.Join(", ", columns);
-            sql.AppendLine(param + ") ");
+            sql.AppendLine(param + "); ");
             sql.AppendLine("SELECT * from @out_id ");
             return sql.ToString();
         }
@@ -722,7 +731,7 @@ namespace simple.sql
 
         #endregion Private
 
-        #region ISimple<T> Members
+        #region Method
 
         public IList<IDictionary<string, object>> Get()
         {
@@ -759,7 +768,13 @@ namespace simple.sql
         /// <exception cref="System.NullReferenceException"></exception>
         public T Single()
         {
-            T t = this.SingleOrDefault();
+            return this.Single<T>();
+        }
+
+        public T1 Single<T1>()
+            where T1 : BModel<T1>
+        {
+            T1 t = this.SingleOrDefault<T1>();
             if (t == null)
             {
                 throw new NullReferenceException();
@@ -774,9 +789,20 @@ namespace simple.sql
         /// <returns></returns>
         public T SingleOrDefault()
         {
+            return this.SingleOrDefault<T>();
+        }
+
+        /// <summary>
+        /// Singles the or default.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public T1 SingleOrDefault<T1>()
+             where T1 : BModel<T1>
+        {
             try
             {
-                return this.GetListResult().SingleOrDefault();
+                return this.GetListResult<T1>().SingleOrDefault();
             }
             catch (Exception ex)
             {
@@ -790,6 +816,16 @@ namespace simple.sql
         /// <returns></returns>
         public IEnumerable<T> GetListResult()
         {
+            return this.GetListResult<T>();
+        }
+
+        /// <summary>
+        /// Gets the list result.
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerable<T1> GetListResult<T1>()
+            where T1 : BModel<T1>
+        {
             try
             {
                 var cmd = this.SqlCommand();
@@ -798,18 +834,13 @@ namespace simple.sql
                 SqlHelper.TraceLogCmd(cmd);
 #endif
                 #endregion
-                return this.Service.Context.GetData<T>(cmd);
+                return this.Service.Context.GetData<T1>(cmd);
             }
             catch (Exception ex)
             {
                 throw ex;
             }
         }
-
-        #endregion ISimple<T> Members
-
-        #region ISimpleSelectFromSQLFile<T> Members
-
         public int Execute()
         {
             try
@@ -828,7 +859,7 @@ namespace simple.sql
             }
         }
 
-        #endregion ISimpleSelectFromSQLFile<T> Members
+        #endregion
     }
 
     public sealed class SimpleSelectFromStored<T> : ISimpleSelectFromStored<T>
